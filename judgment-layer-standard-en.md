@@ -1,293 +1,241 @@
-# AI Judgment Layer Standard White Paper (2026 Official Edition)
-## Subtitle: The Underlying Infrastructure Standard for AI Socialization, Credibility, and Tradability
+# AI Judgment Layer: The Foundation for Trustworthy AI
+
+**HJS Protocol White Paper** | v1.0 · March 2026
+
+<p align="center">
+    <a href="https://github.com/hjs-protocol/whitepaper">
+        <img src="https://img.shields.io/badge/Status-White%20Paper%20%7C%20v1.0-blue" alt="Status">
+    </a>
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/">
+        <img src="https://img.shields.io/badge/License-CC0_1.0-lightgrey" alt="License">
+    </a>
+    <a href="https://github.com/hjs-protocol/spec">
+        <img src="https://img.shields.io/badge/Protocol-IETF%20Draft--00-blue" alt="IETF Draft">
+    </a>
+</p>
 
 ---
 
-# Foreword
-The artificial intelligence industry is currently undergoing a historic transition from efficiency tools to autonomous decision-making, human-machine collaboration, and AI-to-AI interaction. While model capabilities, interactive experiences, multimodal perception, and human-like cognition are developing rapidly, the industry has consistently failed to address a fundamental, fatal problem:
-**AI decision-making is uninterpretable, untraceable, unprovable, and unaccountable.**
+## Abstract
 
-This prevents the true implementation of all highly regulated, high-risk, and high-value scenarios; it prevents AI from establishing trust with one another; it prevents AI decisions from entering the legal system; and it confines all intelligent agents to entertainment, assistance, and non-critical scenarios.
+This white paper introduces the concept of the **AI Judgment Layer**, a new architectural layer for AI systems that enables traceable, verifiable, and accountable decision-making. It describes the motivation, principles, and requirements for such a layer, and presents **HJS (Judgment Event Protocol)** as a concrete implementation being standardized at the IETF.
 
-The Judgment Layer is a **new technological level, industry standard, and trust infrastructure** created to resolve this fundamental contradiction.
-As the world's first AI Judgment Layer standard, this white paper is formulated by the originator of the Judgment Layer theory and is open to the entire industry. It serves as the only underlying specification for AI to achieve credible decision-making, responsibility closure, compliant operation, and judgment transactions.
+The Judgment Layer addresses a fundamental gap in current AI systems: decisions are made without a standardized mechanism for attribution, verification, and responsibility transfer. Without this layer, AI cannot reliably enter high-stakes domains such as finance, healthcare, law, or autonomous systems.
 
 ---
 
-# Chapter 1: Standard Overview
+## 1. The Trust Gap in AI Systems
 
-## 1.1 Purpose of Formulation
-This standard aims to:
-1.  Define the unified architecture, terminology, and specifications of the AI Judgment Layer.
-2.  Establish technical standards for structuring, sequencing, and verifying decision-making processes.
-3.  Clarify the boundaries of the Judgment Layer in law, compliance, and privacy security.
-4.  Provide an implementable industry basis for tracing the responsibility of AI decision-making.
-5.  Support the formation of a future judgment transaction market between AIs.
-6.  Promote the advancement of artificial intelligence from the "efficiency layer" to the "trust layer."
+### 1.1 The Problem
 
-## 1.2 Scope of Application
-This standard applies to:
--   The documentation and tracing of human decision-making processes.
--   The standardization of decision-making processes for large AI models, Agents, and intelligent entities.
--   Highly regulated scenarios such as finance, law, healthcare, autonomous driving, and enterprise risk control.
--   The trust foundation for AI collaboration, transactions, and interactions.
--   Judicial evidence collection, responsibility determination, and compliance audit systems.
+Modern AI systems excel at making decisions—from loan approvals to medical diagnoses, from autonomous driving to content moderation. Yet they share a critical vulnerability: **decisions are made without a trustworthy record of how, why, and by whom they were made.**
 
-## 1.3 Industry Positioning
-The Judgment Layer is a new underlying infrastructure in the artificial intelligence system that is **independent of the model layer, system layer, application layer, and data layer**.
-It does not participate in computation, generate content, optimize effects, or simulate personality. It is responsible for only one thing:
-**Transforming the decision-making process into a provable, adjudicative, and trustworthy chain of facts.**
+Current approaches fall into three inadequate categories:
 
-## 1.4 Core Principles
-1.  **Neutrality**: Does not interfere with, evaluate, or modify the decision itself.
-2.  **Objectivity**: Only records facts, not subjective emotions.
-3.  **Compliance**: Does not collect privacy or store sensitive data.
-4.  **Verifiability**: All nodes are traceable, reproducible, and verifiable.
-5.  **Legal Compatibility**: The chain of facts can be used as electronic data evidence.
+| Approach | Limitation |
+|----------|------------|
+| **Logs** | Record events, not decision structures; easily tampered with |
+| **Chain of Thought** | Internal model reasoning, not externally verifiable |
+| **Notarization** | Stores files, not decision logic chains |
+| **Audit Trails** | Retrospective, not designed for real-time verification |
 
----
+### 1.2 The Consequence
 
-# Chapter 2: Industry Background and Core Problems
+This trust gap prevents AI from:
+- Operating in regulated industries (finance, healthcare, law)
+- Establishing peer-to-peer trust between autonomous agents
+- Providing evidence in legal proceedings
+- Assuming responsibility for critical decisions
+- Enabling a marketplace for AI judgments
 
-## 2.1 The Fundamental Deadlock in the AI Industry
-Current AI solutions focus entirely on:
--   Being faster
--   Being more accurate
--   Being more human-like
--   Being more efficient
--   Being more proactive
+### 1.3 HJS Implementation
 
-However, they consistently fail to address:
--   Who is responsible when something goes wrong
--   How to prove the decision-making process
--   How to assume legal liability
--   How to make two AIs trust each other
--   How to make enterprises dare to entrust critical business to AI
+The HJS protocol addresses this gap through its four core primitives, which provide the foundation for a verifiable judgment layer:
 
-## 2.2 Gaps That Existing Technologies Cannot Fill
--   **Chain of Thought (CoT)**: Internal model reasoning, which is untrustworthy and unprovable.
--   **Logs/Audits**: Record behaviors, not judgment structures.
--   **Notarization Systems**: Store files/data, not decision logic chains.
--   **Diaries/Notes**: Subjective content, which has no legal effect.
--   **Human-like Cognitive OS**: Enhances experience, but does not solve responsibility.
-
-## 2.3 The Fundamental Reason Why the AI Transaction Market Cannot Be Established
-AIs cannot transact with each other because:
-**There is no trustworthy carrier for judgment.**
-Without the Judgment Layer, AIs can only exchange data, not responsibility, logic, or decision results.
-
-## 2.4 The Contradiction Between Privacy and Trust
-The industry is generally trapped in:
--   To be intelligent → must take privacy
--   To be secure → must sacrifice efficiency
--   To trace → must collect data
-
-The Judgment Layer achieves:
-**Decision credibility can be achieved without touching privacy.**
+| Primitive | Purpose | IETF Draft Section |
+|-----------|---------|-------------------|
+| **Judgment** | Record a decision with full context | [3.2.1](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/#section-3.2.1) |
+| **Delegation** | Transfer authority with scope and expiry | [3.2.2](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/#section-3.2.2) |
+| **Termination** | End responsibility chains | [3.2.3](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/#section-3.2.3) |
+| **Verification** | Validate record integrity | [3.2.4](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/#section-3.2.4) |
 
 ---
 
-# Chapter 3: Core Definitions of the Judgment Layer (Standard Level)
+## 2. Core Principles of the Judgment Layer
 
-## 3.1 Judgment Layer (Standard Definition)
-The Judgment Layer is an underlying standard system that **structures, sequences, grounds, and verifies the decision-making processes of humans or AIs**. It is used to generate legally admissible chains of facts, enabling traceable responsibility, provable decisions, and identifiable subjects.
+The Judgment Layer is defined by five core principles:
 
-## 3.2 Judgment Node
-The smallest indivisible unit of thinking in a decision-making process, including: time, subject, action, conditions, basis, and output.
+| Principle | Description |
+|-----------|-------------|
+| **Neutrality** | Does not interfere with, evaluate, or modify decisions |
+| **Objectivity** | Records facts, not subjective interpretations |
+| **Minimalism** | Captures only what is necessary for attribution |
+| **Verifiability** | All records can be independently validated |
+| **Privacy-Preserving** | No collection of personal or sensitive data |
 
-## 3.3 Judgment Basis
-The objective conditions, rules, facts, and data summaries that support a judgment, **excluding the original privacy content**.
+### 2.1 HJS Implementation
 
-## 3.4 Judgment Logic Chain
-The causal relationship and reasoning path formed by multiple judgment nodes in chronological order.
+HJS embodies these principles through:
 
-## 3.5 Sequential Fact Chain
-An objective evidence chain that completely records the entire judgment process, centered on an immutable timeline.
-
-## 3.6 Responsible Subject
-The human, AI, model, Agent, or organization that makes the judgment, which can be uniquely identified and traced.
-
-## 3.7 Verifiability
-The chain of facts can be verified by a third party, and cannot be forged, tampered with, or deleted.
-
-## 3.8 Judgment Transaction
-The exchange of decisions, transfer of value, and confirmation of responsibility between AIs based on a credible judgment chain.
+- **Minimal data model**: Only `entity`, `action`, `scope`, and `timestamp`
+- **Cryptographic receipts**: Self-contained verification credentials
+- **No content storage**: Records structure, not content
+- **Flexible anchoring**: Optional blockchain timestamping
+- **Multiple verification modes**: Platform, open, and dual verification
 
 ---
 
-# Chapter 4: Judgment Layer Standard Architecture
+## 3. Architectural Requirements
 
-## 4.1 Five-Layer Standard Architecture
-1.  **Node Layer**: The smallest judgment unit.
-2.  **Sequential Layer**: Absolute timestamps and order.
-3.  **Basis Layer**: The supporting conditions for judgment.
-4.  **Logic Layer**: Reasoning relationships and structures.
-5.  **Fact Layer**: The final chain that can be used as evidence.
+A robust Judgment Layer must satisfy the following requirements:
 
-## 4.2 Node Structuring Standard
-Each judgment node must contain:
--   Unique ID
--   Timestamp
--   Subject identifier
--   Input conditions
--   Judgment basis (summary)
--   Output result
--   Associated nodes
+| Requirement | Description |
+|-------------|-------------|
+| **Temporal Ordering** | Events must be ordered with high-precision timestamps |
+| **Immutability** | Records cannot be altered after creation |
+| **Attribution** | Each decision must be linked to an identifiable actor |
+| **Delegation** | Authority must be transferable with clear boundaries |
+| **Termination** | Responsibility must be endable |
+| **Verification** | Any party must be able to validate records |
+| **Portability** | Records must be usable across different systems |
 
-## 4.3 Sequential Immutability Standard
--   Time order is irreversible.
--   Nodes cannot be deleted or modified.
--   Historical states can be rolled back.
--   The entire process is reproducible.
+### 3.1 HJS Implementation
 
-## 4.4 Basis Association Standard
--   The basis must be traceable.
--   No original data is stored.
--   No personal privacy is included.
--   Only the minimum information required for judgment is retained.
+HJS satisfies these requirements through:
 
-## 4.5 Privacy Security Standard (Core)
-The Judgment Layer strictly adheres to:
--   No collection of personal information
--   No storage of sensitive data
--   No uploading of privacy content
--   No reading of original files
--   No generation of user profiles
-The Judgment Layer only records the **structure**, not the **content privacy**.
-
-## 4.6 Legal Evidence Standard
-The fact chain generated by the Judgment Layer meets the requirements for:
--   Objective authenticity
--   Integrity
--   Relevance
--   Identifiability
-It complies with the requirements for electronic data evidence in the "Civil Procedure Law," "Data Security Law," and "Personal Information Protection Law."
+| Requirement | HJS Feature |
+|-------------|-------------|
+| Temporal Ordering | UUIDv7 timestamps (RFC 9562) |
+| Immutability | Cryptographic hashing + optional blockchain anchoring |
+| Attribution | `entity` field with flexible identity scheme |
+| Delegation | First-class delegation primitive |
+| Termination | Termination primitive |
+| Verification | Three verification modes + receipt format |
+| Portability | JSON-based format + canonical serialization |
 
 ---
 
-# Chapter 5: Technical Interface Specifications
+## 4. The Four Core Primitives in Detail
 
-## 5.1 Access Standard
-Lightweight, non-intrusive, cross-platform, and cross-model compatible.
+### 4.1 Judgment
 
-## 5.2 Input Specification
-Only receives: judgment nodes, time, basis summary, and subject identifier.
+The Judgment primitive records a decision event. It answers:
+- **Who** made the decision? (`entity`)
+- **What** decision was made? (`action`)
+- **In what context**? (`scope`)
+- **When**? (`timestamp`)
 
-## 5.3 Output Specification
-Outputs: standard fact chain, unique certificate, and verification link.
+### 4.2 Delegation
 
-## 5.4 Compatibility Specification
-Can be integrated with:
--   Large models
--   Agents
--   Enterprise systems
--   Legal tools
--   Autonomous driving systems
--   AI trading platforms
+The Delegation primitive transfers authority from one entity to another. It enables:
+- Hierarchical decision-making structures
+- Temporary authority grants
+- Scoped permissions
+- Multi-agent workflows
 
----
+### 4.3 Termination
 
-# Chapter 6: Legal Compliance Standards
+The Termination primitive ends a responsibility chain. It provides:
+- Clean closure for completed processes
+- Revocation of delegated authority
+- Auditability of responsibility endings
 
-## 6.1 Evidentiary Effect
-The Judgment Layer fact chain is **objective electronic data evidence** that can be directly used for:
--   Responsibility determination
--   Dispute resolution
--   Judicial evidence
--   Compliance audits
+### 4.4 Verification
 
-## 6.2 Responsibility Tracing Rules
--   Who judges → who nodes → who is responsible
--   Sequence is traceable → process is provable → responsibility is determinable
-
-## 6.3 Privacy Boundary (Statutory Level)
-The Judgment Layer is not a personal information processing activity,
-because it **does not process, collect, use, or store privacy data**.
-
-## 6.4 Compliance Commitment
-The Judgment Layer is one of the few AI infrastructures in the world that is **naturally compliant with zero privacy risk**.
+The Verification primitive validates record integrity. It supports:
+- Single-record verification
+- Chain-of-custody validation
+- Third-party attestation
+- Integration with external trust services
 
 ---
 
-# Chapter 7: Application Scenario Standards
+## 5. Privacy and Compliance
 
-## 7.1 Financial AI Decision-Making
-Traceable judgments for risk control, credit granting, wealth management, and trading.
+### 5.1 Privacy by Design
 
-## 7.2 Legal and Contract AI
-Provable processes for review, analysis, and opinions.
+The Judgment Layer is designed to be **privacy-preserving by default**:
 
-## 7.3 Medical Auxiliary Decision-Making
-Documented and accountable diagnostic recommendations and plan basis.
+- **No personal data collection**: Only structural metadata is recorded
+- **No content storage**: The `scope` field contains summaries, not original content
+- **No profiling**: Records are not used for user profiling or analytics
+- **Minimal retention**: Retention periods are configurable and auditable
 
-## 7.4 Autonomous Driving
-Full-chain judgment documentation for perception → decision → execution.
+### 5.2 Regulatory Alignment
 
-## 7.5 AI-to-AI Judgment Transactions
-Two AIs complete credible transactions based on judgment chains.
+HJS is designed to support compliance with major regulations:
 
-## 7.6 Enterprise Internal Management
-Traceable records for approvals, decisions, risk control, and responsibilities.
+| Regulation | Alignment |
+|------------|-----------|
+| **GDPR** | No personal data processing; right to deletion supported |
+| **CCPA** | No sale of personal information |
+| **EU AI Act** | Supports Article 12 (record-keeping) requirements |
+| **Financial Regulations** | Supports audit trail requirements (MiFID II, SOX) |
 
----
+### 5.3 HJS Implementation
 
-# Chapter 8: Boundaries Between the Judgment Layer and Other Technologies
+The HJS protocol implements privacy through:
 
-## 8.1 Difference from Chain of Thought (CoT)
--   CoT: Internal model reasoning, untrustworthy
--   Judgment Layer: Objective record, usable as evidence
-
-## 8.2 Difference from Logs/Audits
--   Logs: Record behaviors
--   Judgment Layer: Record judgment structures
-
-## 8.3 Difference from Notarization
--   Notarization: Stores files/data
--   Judgment Layer: Stores decision logic chains
-
-## 8.4 Difference from Diaries
--   Diaries: Subjective feelings
--   Judgment Layer: Objective fact chains
-
-## 8.5 Difference from Human-like Cognitive OS
--   Cognitive OS: Makes AI more human-like, proactive, and warm
--   Judgment Layer: Makes AI accountable, trustworthy, implementable, and tradable
-
-## 8.6 Difference from the Model Layer
--   Model: Responsible for computation
--   Judgment Layer: Responsible for responsibility and trust
+- **Selective hashing**: Only structural fields are hashed for integrity
+- **No personal identifiers**: `entity` can be any identifier; no PII required
+- **Configurable anchoring**: Users choose whether to anchor to blockchain
+- **Deletion support**: Records can be deleted subject to legal holds
 
 ---
 
-# Chapter 9: Future Evolution: The Judgment Transaction Market
+## 6. The Path to Standardization
 
-## 9.1 The Judgment Layer as the Foundation of the AI Economy
-Data trading → Model trading → **Judgment trading**
-is the inevitable three-stage leap of the AI industry.
+HJS is being standardized through the Internet Engineering Task Force (IETF):
 
-## 9.2 Judgment as a Digital Asset
-Tradable, settleable, trustworthy, and accountable.
+- **Internet-Draft**: [`draft-wang-hjs-judgment-event-00`](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/)
+- **Status**: Active individual draft
+- **Next Steps**: Community feedback, implementation experience, working group adoption
 
-## 9.3 The Only Path to AI Socialization
-Without the Judgment Layer, AI will always be a tool;
-with the Judgment Layer, AI can become a social subject.
-
-## 9.4 Industry Endgame
-Judgment Layer = AI's **legal ID + responsibility base + trust operating system**.
+The protocol is designed to align with related IETF efforts:
+- **SCITT**: For transparency and statement integrity
+- **RATS**: For remote attestation and entity authentication
+- **VAP**: For provenance architecture alignment
 
 ---
 
-# Chapter 10: Standard Declaration
+## 7. Future Directions
 
-## 10.1 Originality Declaration
-This standard is the **world's first AI Judgment Layer standard**, formulated and released by the originator of the Judgment Layer theory.
+### 7.1 Judgment Markets
 
-## 10.2 Open Collaboration Declaration
-This standard is open to the entire industry. Enterprises, institutions, and developers are welcome to participate in its iteration.
+The Judgment Layer enables a future where AI judgments become tradable assets:
 
-## 10.3 Standard Positioning
-The Judgment Layer is the **only underlying infrastructure** for artificial intelligence to enter an era of credibility, compliance, accountability, and tradability.
+- **Judgment as a Service**: AI agents can sell verified judgments
+- **Responsibility Transfer**: Delegation enables complex responsibility chains
+- **Dispute Resolution**: Verified judgment chains support arbitration
+
+### 7.2 Cross-Domain Applications
+
+| Domain | Application |
+|--------|-------------|
+| **Finance** | Traceable risk decisions, audit trails |
+| **Healthcare** | Verifiable diagnostic pathways |
+| **Legal** | Documented reasoning chains for contracts |
+| **Autonomous Systems** | Decision logs for safety analysis |
+| **Multi-Agent Systems** | Trust foundation for agent collaboration |
 
 ---
 
-**Without the Judgment Layer, there is no future for AI.**
+## 8. Conclusion
+
+The Judgment Layer represents a fundamental advance in AI architecture. By providing a standardized mechanism for recording, transferring, and verifying decisions, it enables AI to operate in domains where trust and accountability are paramount.
+
+**HJS** is a concrete implementation of this vision—a minimal, portable, verifiable protocol being standardized at the IETF. It provides the technical foundation for trustworthy AI systems, enabling a future where AI decisions can be traced, verified, and held accountable.
+
+---
+
+## References
+
+1. HJS Protocol Specification: [https://github.com/hjs-protocol/spec](https://github.com/hjs-protocol/spec)
+2. IETF Internet-Draft: [`draft-wang-hjs-judgment-event-00`](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/)
+3. SCITT Working Group: [https://datatracker.ietf.org/wg/scitt/](https://datatracker.ietf.org/wg/scitt/)
+4. RATS Working Group: [https://datatracker.ietf.org/wg/rats/](https://datatracker.ietf.org/wg/rats/)
+
+---
+
+**© 2026 Human Judgment Systems Foundation Ltd.**  
+This white paper is released into the public domain under the [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) license.
