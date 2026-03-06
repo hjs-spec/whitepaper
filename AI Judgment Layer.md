@@ -191,11 +191,6 @@ HJS is being standardized through the Internet Engineering Task Force (IETF):
 - **Status**: Active individual draft
 - **Next Steps**: Community feedback, implementation experience, working group adoption
 
-The protocol is designed to align with related IETF efforts:
-- **SCITT**: For transparency and statement integrity
-- **RATS**: For remote attestation and entity authentication
-- **VAP**: For provenance architecture alignment
-
 ---
 
 ## 7. Future Directions
