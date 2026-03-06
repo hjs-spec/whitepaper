@@ -22,7 +22,7 @@ This repository contains the official white paper for the **AI Judgment Layer**,
 
 | File | Description |
 |------|-------------|
-| [`whitepaper.md`](https://github.com/hjs-spec/whitepaper/blob/main/AI%20Judgment%20Layer.md)) | Full white paper (English) |
+| [`whitepaper.md`](https://github.com/hjs-spec/whitepaper/blob/main/AI%20Judgment%20Layer.md) | Full white paper (English) |
 
 ## Relationship to HJS Protocol
 
