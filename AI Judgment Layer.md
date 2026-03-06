@@ -48,9 +48,9 @@ This trust gap prevents AI from:
 - Assuming responsibility for critical decisions
 - Enabling a marketplace for AI judgments
 
-### 1.3 HJS Implementation
+### 1.3 JEP Implementation
 
-The HJS protocol addresses this gap through its four core primitives, which provide the foundation for a verifiable judgment layer:
+The JEP protocol addresses this gap through its four core primitives, which provide the foundation for a verifiable judgment layer:
 
 | Primitive | Purpose | IETF Draft Section |
 |-----------|---------|-------------------|
@@ -73,9 +73,9 @@ The Judgment Layer is defined by five core principles:
 | **Verifiability** | All records can be independently validated |
 | **Privacy-Preserving** | No collection of personal or sensitive data |
 
-### 2.1 HJS Implementation
+### 2.1 JEP Implementation
 
-HJS embodies these principles through:
+JEP embodies these principles through:
 
 - **Minimal data model**: Only `entity`, `action`, `scope`, and `timestamp`
 - **Cryptographic receipts**: Self-contained verification credentials
@@ -99,9 +99,9 @@ A robust Judgment Layer must satisfy the following requirements:
 | **Verification** | Any party must be able to validate records |
 | **Portability** | Records must be usable across different systems |
 
-### 3.1 HJS Implementation
+### 3.1 JEP Implementation
 
-HJS satisfies these requirements through:
+JEP satisfies these requirements through:
 
 | Requirement | HJS Feature |
 |-------------|-------------|
@@ -163,7 +163,7 @@ The Judgment Layer is designed to be **privacy-preserving by default**:
 
 ### 5.2 Regulatory Alignment
 
-HJS is designed to support compliance with major regulations:
+JEP is designed to support compliance with major regulations:
 
 | Regulation | Alignment |
 |------------|-----------|
@@ -172,9 +172,9 @@ HJS is designed to support compliance with major regulations:
 | **EU AI Act** | Supports Article 12 (record-keeping) requirements |
 | **Financial Regulations** | Supports audit trail requirements (MiFID II, SOX) |
 
-### 5.3 HJS Implementation
+### 5.3 JEP Implementation
 
-The HJS protocol implements privacy through:
+The JEP protocol implements privacy through:
 
 - **Selective hashing**: Only structural fields are hashed for integrity
 - **No personal identifiers**: `entity` can be any identifier; no PII required
@@ -185,7 +185,7 @@ The HJS protocol implements privacy through:
 
 ## 6. The Path to Standardization
 
-HJS is being standardized through the Internet Engineering Task Force (IETF):
+JEP is being standardized through the Internet Engineering Task Force (IETF):
 
 - **Internet-Draft**: [`draft-wang-hjs-judgment-event-00`](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/)
 - **Status**: Active individual draft
@@ -219,13 +219,13 @@ The Judgment Layer enables a future where AI judgments become tradable assets:
 
 The Judgment Layer represents a fundamental advance in AI architecture. By providing a standardized mechanism for recording, transferring, and verifying decisions, it enables AI to operate in domains where trust and accountability are paramount.
 
-**HJS** is a concrete implementation of this vision—a minimal, portable. It provides the technical foundation for trustworthy AI systems, enabling a future where AI decisions can be traced, verified, and held accountable.
+**JEP** is a concrete implementation of this vision—a minimal, portable. It provides the technical foundation for trustworthy AI systems, enabling a future where AI decisions can be traced, verified, and held accountable.
 
 ---
 
 ## References
 
-1. HJS Protocol Specification: [https://github.com/hjs-protocol/spec](https://github.com/hjs-spec)
+1. JEP Protocol Specification: [https://github.com/hjs-protocol/spec](https://github.com/hjs-spec)
 ---
 
 **© 2026 HJS Foundation Ltd.**  
