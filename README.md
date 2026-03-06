@@ -50,5 +50,5 @@ This white paper is released into the **public domain** under the [CC0 1.0 Unive
 
 ---
 
-**© 2026 Human Judgment Systems Foundation Ltd.**  
+**© 2026 HJS Foundation Ltd.**  
 This document is licensed under the [MIT License](https://opensource.org/licenses/MIT).
