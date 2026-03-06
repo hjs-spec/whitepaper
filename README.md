@@ -24,7 +24,7 @@ This repository contains the official white paper for the **AI Judgment Layer**,
 |------|-------------|
 | [`whitepaper.md`](https://github.com/hjs-spec/whitepaper/blob/main/AI%20Judgment%20Layer.md) | Full white paper (English) |
 
-## Relationship to HJS Protocol
+## Relationship to JEP Protocol
 
 The AI Judgment Layer Standard describes the **conceptual architecture** and **motivation** for a dedicated judgment layer in AI systems. The [JEP Protocol](https://github.com/hjs-protocol/spec) is a concrete implementation of this layer, providing the core primitives defined in this white paper.
 
