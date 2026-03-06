@@ -26,13 +26,13 @@ This repository contains the official white paper for the **AI Judgment Layer**,
 
 ## Relationship to HJS Protocol
 
-The AI Judgment Layer Standard describes the **conceptual architecture** and **motivation** for a dedicated judgment layer in AI systems. The [HJS Protocol](https://github.com/hjs-protocol/spec) is a concrete implementation of this layer, providing the core primitives defined in this white paper.
+The AI Judgment Layer Standard describes the **conceptual architecture** and **motivation** for a dedicated judgment layer in AI systems. The [JEP Protocol](https://github.com/hjs-protocol/spec) is a concrete implementation of this layer, providing the core primitives defined in this white paper.
 
 | Concept | Implementation |
 |---------|----------------|
-| Judgment Layer Architecture | [HJS Protocol Specification](https://github.com/hjs-protocol/spec) |
-| Core Primitives | [HJS Core (Rust)](https://github.com/hjs-protocol/core) |
-| API Service | [HJS API](https://github.com/hjs-protocol/api) |
+| Judgment Layer Architecture | [JEP Protocol Specification](https://github.com/hjs-protocol/spec) |
+| Core Primitives | [JEP Core (Rust)](https://github.com/hjs-protocol/core) |
+| API Service | [JEP API](https://github.com/hjs-protocol/api) |
 
 ## License
 
@@ -40,9 +40,9 @@ This white paper is released into the **public domain** under the [CC0 1.0 Unive
 
 ## Related Repositories
 
-- [HJS Protocol Specification](https://github.com/hjs-protocol/spec)
-- [HJS Core Implementation](https://github.com/hjs-protocol/core)
-- [HJS API Service](https://github.com/hjs-protocol/api)
+- [JEP Protocol Specification](https://github.com/hjs-protocol/spec)
+- [JEP Core Implementation](https://github.com/hjs-protocol/core)
+- [JEP API Service](https://github.com/hjs-protocol/api)
 
 ## Contact
 
