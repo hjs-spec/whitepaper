@@ -47,7 +47,6 @@ This white paper is released into the **public domain** under the [CC0 1.0 Unive
 ## Contact
 
 - **Email**: [signal@humanjudgment.org](mailto:signal@humanjudgment.org)
-- **GitHub Issues**: [hjs-protocol/whitepaper/issues](https://github.com/hjs-protocol/whitepaper/issues)
 
 ---
 
