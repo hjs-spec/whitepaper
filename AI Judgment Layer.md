@@ -18,7 +18,7 @@
 
 ## Abstract
 
-This white paper introduces the concept of the **AI Judgment Layer**, a new architectural layer for AI systems that enables traceable, verifiable, and accountable decision-making. It describes the motivation, principles, and requirements for such a layer, and presents **HJS (Judgment Event Protocol)** as a concrete implementation being standardized at the IETF.
+This white paper introduces the concept of the **AI Judgment Layer**, a new architectural layer for AI systems that enables traceable, verifiable, and accountable decision-making. It describes the motivation, principles, and requirements for such a layer, and presents **HJS (Judgment Event Protocol)** 
 
 The Judgment Layer addresses a fundamental gap in current AI systems: decisions are made without a standardized mechanism for attribution, verification, and responsibility transfer. Without this layer, AI cannot reliably enter high-stakes domains such as finance, healthcare, law, or autonomous systems.
 
