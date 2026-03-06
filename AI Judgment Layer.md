@@ -219,18 +219,14 @@ The Judgment Layer enables a future where AI judgments become tradable assets:
 
 The Judgment Layer represents a fundamental advance in AI architecture. By providing a standardized mechanism for recording, transferring, and verifying decisions, it enables AI to operate in domains where trust and accountability are paramount.
 
-**HJS** is a concrete implementation of this vision—a minimal, portable, verifiable protocol being standardized at the IETF. It provides the technical foundation for trustworthy AI systems, enabling a future where AI decisions can be traced, verified, and held accountable.
+**HJS** is a concrete implementation of this vision—a minimal, portable. It provides the technical foundation for trustworthy AI systems, enabling a future where AI decisions can be traced, verified, and held accountable.
 
 ---
 
 ## References
 
-1. HJS Protocol Specification: [https://github.com/hjs-protocol/spec](https://github.com/hjs-protocol/spec)
-2. IETF Internet-Draft: [`draft-wang-hjs-judgment-event-00`](https://datatracker.ietf.org/doc/draft-wang-hjs-judgment-event/)
-3. SCITT Working Group: [https://datatracker.ietf.org/wg/scitt/](https://datatracker.ietf.org/wg/scitt/)
-4. RATS Working Group: [https://datatracker.ietf.org/wg/rats/](https://datatracker.ietf.org/wg/rats/)
-
+1. HJS Protocol Specification: [https://github.com/hjs-protocol/spec](https://github.com/hjs-spec)
 ---
 
-**© 2026 Human Judgment Systems Foundation Ltd.**  
+**© 2026 HJS Foundation Ltd.**  
 This white paper is released into the public domain under the [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) license.
