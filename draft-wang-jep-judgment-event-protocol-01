@@ -1,0 +1,3072 @@
+Internet-Draft                                            Y. Wang
+draft-wang-jep-judgment-event-protocol-01          HJS Foundation Ltd.
+Intended status: Standards Track                      March 17, 2026
+Expires: September 3, 2026
+
+
+           JEP: A Judgment Event Protocol
+         draft-wang-jep-judgment-event-protocol-01
+
+Abstract
+
+   This document defines the Judgment Event Protocol (JEP), an
+   accountability attribution framework for distributed AI systems.
+   JEP provides a responsibility tracing mechanism for judgment
+   behaviors, operating with identity verification (OAuth/DID) and
+   environmental trust (RATS).
+
+   Core Design:
+   - Four-primitive model: $Judge, $Delegate, $Terminate, $Verify,
+     covering the complete judgment lifecycle
+   - Three-tier privacy architecture: Public Governance Tier, Logical
+     Accountability Tier, Private Payload Tier, balancing transparency
+     and privacy
+   - Progressive verification strategy: from open mode (local
+     verification) to platform mode (platform-enhanced), adapting to
+     different scenarios
+   - Compliance-friendly design: cryptographic erasure mechanism
+     supports GDPR "right to be forgotten" and similar requirements,
+     with specific policies configured by deployers
+
+   JEP follows a "minimal intrusion, maximum compatibility" philosophy,
+   adding verifiable accountability capabilities to critical judgment
+   nodes without reconstructing AI systems, working with IETF standards
+   including SCITT, RATS, and OAuth.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other documents
+   at any time.  It is inappropriate to use Internet-Drafts as
+   reference material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on September 3, 2026.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with
+   respect to this document.  Code Components extracted from this
+   document MUST include the Revised BSD License text as described in
+   Section 4.e of the Trust Legal Provisions and are provided without
+   warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  Problem Statement
+     1.2.  Related Work
+     1.3.  Design Goals
+     1.4.  Relationship to IETF Ecosystem
+     1.5.  Compatibility with EU Regulatory Frameworks
+   2.  Terminology and Conventions
+     2.1.  Requirements Notation
+     2.2.  Core Concepts
+       2.2.1.  Judgment
+       2.2.2.  Receipt
+       2.2.3.  Judgment Actor
+       2.2.4.  Authorization Chain
+       2.2.5.  Cryptographic Erasure
+   3.  Three-Tier Privacy Architecture
+     3.1.  Design Principles
+     3.2.  Public Governance Tier
+     3.3.  Logical Accountability Tier
+     3.4.  Private Payload Tier
+     3.5.  Tier Relationships
+   4.  JEP Protocol Specification
+     4.1.  Four Primitives
+       4.1.1.  $Judge Primitive
+       4.1.2.  $Delegate Primitive
+       4.1.3.  $Terminate Primitive
+       4.1.4.  $Verify Primitive
+     4.2.  State Machine
+       4.2.1.  State Definitions
+       4.2.2.  State Transition Rules
+       4.2.3.  Delegation Flow
+     4.3.  Event Format
+       4.3.1.  Common Fields
+       4.3.2.  Lifecycle Events
+       4.3.3.  Verify Events
+     4.4.  Receipt Format
+       4.4.1.  Receipt Structure
+       4.4.2.  Hash Computation
+       4.4.3.  Verification Algorithm
+     4.5.  Verification Modes
+       4.5.1.  open Mode
+       4.5.2.  platform Mode
+       4.5.3.  dual Mode
+       4.5.4.  DISPUTED State Handling
+       4.5.5.  Dispute Resolution and Recovery
+     4.6.  Error Handling
+     4.7.  Time Trust Anchor Mechanism
+   5.  Extensions and Integration
+     5.1.  Extension Mechanism
+     5.2.  SCITT Usage
+     5.3.  RATS Usage
+       5.3.1.  TEE Evidence Encoding in Tier 2
+       5.3.2.  TEE-Specific Measurement Formats
+       5.3.3.  TEE Binding Verification Procedure
+     5.4.  Identity Framework Usage
+     5.5.  Extension Specification Requirements
+   6.  Security Considerations
+     6.1.  Threat Model
+     6.2.  Key Management
+       6.2.1.  Signature Keys
+       6.2.2.  Encryption Keys (Tier 3)
+       6.2.3.  Key Compromise Containment
+     6.3.  Cryptographic Mechanisms
+       6.3.1.  Algorithm Selection Rationale
+       6.3.2.  Algorithm Agility
+     6.4.  Attack Analysis
+     6.5.  Post-Quantum Migration
+   7.  Privacy Considerations
+     7.1.  Privacy Risk Analysis
+     7.2.  Data Minimization
+     7.3.  Cryptographic Erasure Mechanism
+     7.4.  Deployment Recommendations
+     7.5.  EU Regulatory Compliance Analysis
+       7.5.1.  GDPR Compliance Mapping
+       7.5.2.  EU AI Act Compliance Mapping
+       7.5.3.  Judicial Recognition of Cryptographic Erasure
+       7.5.4.  Deployment Recommendations for EU Compliance
+   8.  IANA Considerations
+     8.1.  Media Type Registration
+     8.2.  JWS Header Parameters Registration
+     8.3.  JEP Error Code Registry
+     8.4.  JEP Extension Registry
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
+   Appendix A.  Performance Benchmarks
+   Appendix B.  Dispute Handling Framework
+   Appendix C.  Implementation Risks and Mitigations
+   Appendix D.  Compatibility with HJS-00
+   Appendix E.  Implementation Guide
+   Appendix F.  Test Vectors
+   Appendix G.  Protocol Extensions
+     G.1.  Extension Mechanism Principles
+     G.2.  Priority 1 Extensions (Strongly Recommended)
+       G.2.1.  TEE Evidence Format
+       G.2.2.  Resolution Event ($Resolve)
+       G.2.3.  Multi-Source Time Validation
+     G.3.  Priority 2 Extensions (Optional)
+       G.3.1.  Lightweight Mode
+       G.3.2.  AIP Usage
+       G.3.3.  Batch Operations
+       G.3.4.  Refusal Event
+     G.4.  Priority 3 Extensions (Security Enhancement)
+       G.4.1.  Key Evolution
+       G.4.2.  Enhanced Hardware Binding
+     G.5.  Priority 4 Extensions (Compliance Support)
+       G.5.1.  Jurisdiction Marking
+       G.5.2.  Legal Validity Proof
+       G.5.3.  GDPR Compliance Proof
+       G.5.4.  AI Act Transparency Marking
+     G.6.  Priority 5 Extensions (Governance Flexibility)
+       G.6.1.  Federal Resolution
+   Appendix H.  TEE Evidence Examples
+   Appendix I.  Dispute Resolution Workflow Examples
+   Appendix J.  EU Compliance Quick Reference Guide
+   Appendix K.  Tier Mapping Reference
+   Author's Address
+
+
+1.  Introduction
+
+1.1.  Problem Statement
+
+   As AI systems rapidly evolve from isolated black boxes to
+   interconnected decision networks, a fundamental governance gap has
+   emerged in the Internet protocol stack: the semantic absence of
+   judgment behavior accountability.
+
+   Current infrastructure can prove "data was delivered" or
+   "platform trust state was established," but cannot securely convey
+   across heterogeneous environments "who made what judgment, when,
+   based on what authorization."  This creates an attribution break
+   when accountability information flows across platforms.
+
+   Consider a representative multi-stage AI medical diagnosis chain
+   (this pattern applies equally to financial auditing, autonomous
+   driving multi-sensor fusion, and other cross-platform AI collaboration
+   scenarios):
+
+   - Stage 1: Primary screening AI flags potential cardiac anomalies
+   - Stage 2: Specialist AI confirms diagnosis and recommends
+     treatment based on Stage 1 input
+   - Stage 3: Clinical Decision Support System (CDSS) generates final
+     report
+
+   In post-incident tracing of misdiagnosis cases, audit agencies
+   typically face:
+
+   1.  Judgment silos: Stage 1 results exist only in private logs,
+       lacking credentials that subsequent stages can reference and
+       cryptographically verify.
+
+   2.  Accountability chain break: Stage 2 records "external input"
+       but cannot technically prove whether that input was legally
+       delegated.
+
+   3.  Governance cost: Audit teams spend excessive time reconciling
+       incompatible proprietary log formats, yet still cannot form a
+       closed-loop evidence chain.
+
+   The root cause is the absence of a standard, portable judgment
+   event primitive, causing attribution break during cross-platform
+   accountability information flow.
+
+1.2.  Related Work
+
+   SCITT [draft-ietf-scitt-architecture] provides transparent records
+   for supply chain artifacts, forming an essential foundation for
+   software supply chain security.
+
+   VAP [draft-ailex-vap-legal-ai-provenance] provides comprehensive
+   provenance tracking across the AI lifecycle, addressing critical
+   needs for AI transparency and auditability.
+
+   DMSC [draft-li-dmsc-inf-architecture] provides infrastructure
+   support for dynamic multi-agent secured collaboration.  JEP receipt
+   chains may serve as accountability evidence for DMSC-orchestrated
+   multi-agent workflows, particularly for high-risk AI decisions
+   requiring post-hoc audit.
+
+   JEP addresses judgment accountability as a specific concern within
+   the broader AI governance landscape, complementing the above work
+   by focusing on the attribution of judgment behaviors across
+   distributed systems.
+
+1.3.  Design Goals
+
+   JEP follows an "Atomically Complete" design philosophy (meaning
+   judgment receipts contain the minimal non-divisible evidence set,
+   not distributed transaction atomicity):
+
+   - Minimal Integration Cost: The protocol operates as a "governance
+     plane," not requiring AI systems to reconstruct inference logic,
+     only generating specification-compliant receipts at judgment
+     nodes.
+
+   - Semantic Neutrality: The protocol does not model judgment
+     content, only modeling judgment attributes (actor, time,
+     authorization, state).
+
+   - Non-repudiability: Judgment effectiveness exists independently of
+     the originating system; auditors can verify responsibility chain
+     integrity without accessing inference environments.
+
+   - Progressive Deployment: From minimal configuration
+     (single-signature) to full functionality (three-tier
+     architecture), scaling by requirements and capabilities.
+
+   - Scope Delimitation: JEP addresses accountability attribution for
+     judgment events only. It does not provide data lineage, model
+     provenance, training record verification, or end-to-end supply
+     chain tracking. These are valid concerns addressed by other
+     protocols; JEP's scope focuses on judgment accountability to
+     enable minimal integration cost and clear deployment boundaries.
+
+1.4.  Relationship to IETF Ecosystem
+
+   JEP operates with IETF trustworthy architecture:
+
+   - SCITT [draft-ietf-scitt-architecture] may provide timestamp
+     services for JEP receipts.
+   - RATS [RFC9334] attestations may be recorded in JEP Tier 2
+     contextual evidence.
+   - Identity frameworks (OAuth [RFC6749], DID [DID-CORE], AIP
+     [AIP-CORE]) may provide identity verification services for JEP
+     actors.
+
+   Table 1: JEP Positioning in Protocol Stack
+
+   +------------------+------------------------+-----------------------+
+   | Existing Layer   | Function               | JEP Usage             |
+   +------------------+------------------------+-----------------------+
+   | TLS/Transport    | Data secure transport  | No intervention       |
+   +------------------+------------------------+-----------------------+
+   | OAuth/DID/       | Principal identity     | Reference identity    |
+   | Identity         | verification           | markers, add behavior |
+   |                  |                        | responsibility trail  |
+   +------------------+------------------------+-----------------------+
+   | RATS [RFC9334]   | Environmental          | Optional environmental|
+   |                  | trustworthiness proof  | evidence in Tier 2    |
+   +------------------+------------------------+-----------------------+
+   | SCITT            | Artifact existence     | Optional timestamp    |
+   | [draft-ietf-     | recording              | anchoring             |
+   | scitt-arch]      |                        |                       |
+   +------------------+------------------------+-----------------------+
+   | JEP/Governance   | Judgment behavior      | Core protocol         |
+   | (New)            | responsibility         |                       |
+   |                  | attribution            |                       |
+   +------------------+------------------------+-----------------------+
+
+1.5.  Compatibility with EU Regulatory Frameworks
+
+   This protocol was designed with compatibility with major EU data
+   protection and AI regulatory frameworks in mind, particularly:
+
+   - GDPR (General Data Protection Regulation) accountability
+     principle, privacy by design, right to be forgotten, and data
+     security requirements
+
+   - EU AI Act (key effective dates in 2026) high-risk AI
+     transparency obligations and sensitive data processing
+     requirements
+
+   - 2026 Digital Omnibus Act unified requirements for AI training
+   data legitimate interests, bias detection, and incident reporting
+
+   JEP-01 achieves compliance-friendly design through:
+   - Cryptographic erasure mechanism (Section 7.3): Achieves
+     "compliant forgetting" by destroying decryption keys while
+     retaining auditable "logical tombstones," addressing
+     the right to be forgotten through an approach distinct from
+     append-only ledger technologies
+
+   - Three-tier privacy architecture (Section 3): Tier 1 only
+     exposes rotatable agent IDs, Tier 2 only accessible to auditors,
+     Tier 3 only stores hash digests, naturally conforming to data
+     minimization and privacy by design principles
+
+   - TEE hardware binding (Section 5.3): Transforms hardware trust
+     roots into logical accountability, meeting high-risk AI system
+     security trust requirements
+
+   - Configurable jurisdiction marking (Appendix G.5.1): Supports
+     configuring retention periods and localization strategies
+     according to GDPR, CCPA, PIPL, and other regulations
+
+   Deployers can achieve more granular compliance proof through
+   Appendix G compliance extensions.  The cryptographic erasure
+   mechanism of this protocol references ENISA "Data Protection
+   Engineering" reports and EDPB "Right to be Forgotten Guidelines"
+   in its design, and is designed to provide verifiable evidence of
+   compliance with erasure obligations, though final recognition
+   depends on specific jurisdictional interpretation.
+
+
+2.  Terminology and Conventions
+
+2.1.  Requirements Notation
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+   NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"
+   in this document are to be interpreted as described in BCP 14
+   [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.2.  Core Concepts
+
+2.2.1.  Judgment
+
+   An atomic declaration made by a judgment actor in a specific
+   context, possessing accountability effectiveness.  It represents
+   the actor's logical commitment to that declaration, not the
+   absolute truth of the fact.
+
+2.2.2.  Receipt
+
+   A cryptographically verifiable judgment event record following JEP
+   specification, serving as the minimal data unit for accountability
+   tracing.
+
+2.2.3.  Judgment Actor
+
+   An entity (human or AI agent) initiating judgment behavior, whose
+   identity is typically endorsed by hardware trust root.
+
+2.2.4.  Authorization Chain
+
+   A traceable path recording the flow of accountability sovereignty
+   from mandator to delegatee, formed through parent receipt
+   references.
+
+2.2.5.  Cryptographic Erasure
+
+   A technical mechanism rendering receipt ciphertext computationally
+   unreadable by destroying decryption keys, used to satisfy
+   compliance requirements such as GDPR "right to be forgotten."
+
+
+3.  Three-Tier Privacy Architecture
+
+3.1.  Design Principles
+
+   The three-tier privacy decoupled architecture achieves atomic
+   completeness of four elements through physical and logical dual
+   isolation, ensuring accountability transparency while maintaining
+   individual privacy.
+
+3.2.  Public Governance Tier
+
+   - Constituent Element: Identity Anchor
+   - Function: Proves "who" initiated the operation
+   - Technical Implementation: Based on DID, OAuth, or other
+     interoperable identity frameworks, carrying judgment actor agent
+     identity markers
+   - Privacy Property: Public.  Used for global transparent auditing,
+     replay attack prevention, and notary service mapping.  This tier
+     exposes only agent identity (AI Agent ID); human operator
+     identity is protected through authorization chain limited
+     disclosure in Tier 2 or privacy-preserving DID.
+
+3.3.  Logical Accountability Tier
+
+   - Constituent Elements: Authorization Chain, Contextual Evidence
+   - Function: Proves "based on what legitimacy" and "in what
+     environment" the judgment was made
+   - Technical Implementation:
+     * Authorization Chain: Contains parent receipt reference,
+       forming traceable responsibility chain, recording sovereignty
+       flow path from mandator to delegatee
+     * Contextual Evidence: Contains encrypted timestamp and
+       environmental security measurements (e.g., RATS hardware proof
+       or TEE measurement data)
+   - Privacy Property: Limited disclosure.  Visible only to entities
+     with audit permissions, ensuring auditors can verify
+     responsibility flow path and judgment environment trustworthiness
+     without exposing judgment content.
+
+3.4.  Private Payload Tier
+
+   - Constituent Element: Logic Payload
+   - Function: Anchors judgment substantive content, ensuring results
+     were not tampered with
+   - Technical Implementation: Encrypted hash digest of judgment
+     content, with original text protected by out-of-band encrypted
+     storage or independent keys
+   - Privacy Property: Strictly private.  Receipt stores only content
+     digest.  During cryptographic erasure execution, only
+     destroying keys associated with this tier achieves compliant
+     "forgetting" without breaking Tier 1 and Tier 2 governance
+     structure integrity.
+
+3.5.  Tier Relationships
+
+   Table 2: Four Elements Privacy Mapping
+
+   +------------------+----------------+------------+------------------+
+   | Element          | Privacy Tier   | Visibility | Core Function      |
+   +------------------+----------------+------------+------------------+
+   | Identity Anchor  | Tier 1         | Public     | Establish        |
+   |                  |                |            | responsibility   |
+   |                  |                |            | principal        |
+   +------------------+----------------+------------+------------------+
+   | Authorization    | Tier 2         | Limited    | Trace              |
+   | Chain            |                |            | responsibility   |
+   |                  |                |            | flow               |
+   +------------------+----------------+------------+------------------+
+   | Contextual       | Tier 2         | Limited    | Verify judgment    |
+   | Evidence         |                |            | environment        |
+   +------------------+----------------+------------+------------------+
+   | Logic Payload    | Tier 3         | Strict     | Anchor judgment    |
+   |                  |                | private    | content            |
+   +------------------+----------------+------------+------------------+
+
+
+4.  JEP Protocol Specification
+
+4.1.  Four Primitives
+
+   JEP defines the complete judgment lifecycle governance through four
+   core primitives.
+
+4.1.1.  $Judge Primitive
+
+   Judgment initiation primitive.  Used to create new judgment events,
+   encapsulating principal declarations into initial receipts.
+
+   - Initiated by judgment actor
+   - Establishes Tier 1 identity anchor and initial sovereignty
+   - Generates initial receipt with no parent reference
+   - Post-state: ACTIVE
+
+4.1.2.  $Delegate Primitive
+
+   Delegation primitive.  Used to execute responsibility transfer,
+   recording accountability sovereignty flow path from mandator to
+   delegatee.
+
+   - Phase One (Initiation): Mandator generates delegation proposal,
+     state becomes DELEGATING
+   - Phase Two (Acceptance): Delegatee generates acceptance
+     signature, state becomes DELEGATED
+   - Timeout Rollback: If acceptance signature not received within
+     specified time, automatic rollback to ACTIVE
+   - Supports multi-level delegation
+   - Pre-state MUST be ACTIVE or DELEGATED
+   - Mandator MUST exist in current Tier 2 authorization chain
+
+4.1.3.  $Terminate Primitive
+
+   Termination primitive.  Used to formally declare the end of
+   judgment accountability lifecycle.  Signed by authorized
+   principal, ensuring termination behavior itself is non-repudiable.
+   Supports "archived state" and "cryptographic erasure" modes.
+
+   - ACTIVE state: Judgment actor MAY directly terminate, generating
+     termination receipt
+   - DELEGATED state: Mandator and Delegatee MUST execute dual
+     signature to achieve closed-loop consensus, preventing unilateral
+     responsibility evasion
+   - DELEGATING state: Mandator MAY unilaterally cancel incomplete
+     delegation, state rolls back to ACTIVE
+   - Termination mode marking: ARCHIVED (retain all three tiers) or
+     ERASED (erase Tier 3)
+   - Post-state: TERMINATED_ARCHIVED or TERMINATED_ERASED
+
+4.1.4.  $Verify Primitive
+
+   Verification primitive.  Non-state-changing operation for
+   integrity, authorization legitimacy, and timeliness verification
+   of receipts and their responsibility chains.  Executable at any
+   point during active period and post-termination audit period.
+
+   - Probe Mode: Immediate feedback verification result, no trace
+     generated
+   - Audit Mode: Generates verification trace record, produces Verify
+     receipt
+
+4.2.  State Machine
+
+4.2.1.  State Definitions
+
+   Table 3: Judgment Lifecycle States
+
+   +------------------------+------------------------------------------+
+   | State                  | Meaning                                  |
+   +------------------------+------------------------------------------+
+   | INITIATED              | Initial state, no receipt.  Supports     |
+   |                        | pre-authorization and bootstrap scenarios. |
+   +------------------------+------------------------------------------+
+   | ACTIVE                 | Judgment created, responsibility not yet   |
+   |                        | transferred.                             |
+   +------------------------+------------------------------------------+
+   | DELEGATING             | Delegation initiated, awaiting Delegatee |
+   |                        | acceptance signature.                      |
+   +------------------------+------------------------------------------+
+   | DELEGATED              | Valid acceptance signature received,     |
+   |                        | responsibility transferred to Delegatee. |
+   +------------------------+------------------------------------------+
+   | TERMINATED_ARCHIVED    | Terminated state, all three tiers retained |
+   |                        | for long-term compliance audit.            |
+   +------------------------+------------------------------------------+
+   | TERMINATED_ERASED      | Terminated state, Tier 3 logic payload     |
+   |                        | cryptographically erased (satisfying     |
+   |                        | right to be forgotten).                  |
+   +------------------------+------------------------------------------+
+   | DISPUTED_FROZEN        | Dispute detected, chain frozen pending     |
+   |                        | resolution                                 |
+   +------------------------+------------------------------------------+
+   | RESOLVED_CONTINUE      | Dispute resolved, chain operational with   |
+   |                        | resolution mark                          |
+   +------------------------+------------------------------------------+
+   | RESOLVED_INVALID       | Dispute resolved by invalidation,        |
+   |                        | re-initiation required                   |
+   +------------------------+------------------------------------------+
+   | VERIFIED               | Meta-state indicating logical chain      |
+   |                        | legitimacy confirmed (read-only result). |
+   +------------------------+------------------------------------------+
+
+4.2.2.  State Transition Rules
+
+   $Judge Transition:
+   - Initiated by judgment actor, establishes Tier 1 identity anchor
+     and initial sovereignty
+   - Generates initial receipt, no parent reference
+   - Post-state: ACTIVE
+
+   $Delegate Transition:
+   - Phase One (Initiation): Mandator generates delegation proposal,
+     state becomes DELEGATING
+   - Phase Two (Acceptance): Delegatee generates acceptance
+     signature, state becomes DELEGATED
+   - Timeout Rollback: If acceptance signature not received within
+     specified time, automatic rollback to ACTIVE
+   - Supports multi-level delegation
+   - Pre-state MUST be ACTIVE or DELEGATED
+   - Mandator MUST exist in current Tier 2 authorization chain
+
+   $Terminate Transition:
+   - ACTIVE state: Judgment actor MAY directly terminate
+   - DELEGATED state: Mandator and Delegatee MUST execute dual
+     signature
+   - DELEGATING state: Mandator MAY unilaterally cancel, state rolls
+     back to ACTIVE
+   - Termination mode marking: ARCHIVED or ERASED
+   - Post-state: TERMINATED_ARCHIVED or TERMINATED_ERASED
+
+   $Verify Execution:
+   - Non-state-changing operation
+   - Probe Mode: Immediate feedback, no trace
+   - Audit Mode: Generates verification trace
+
+   $Resolve Transition (see Section 4.5.5):
+   - Pre-state: DISPUTED_FROZEN
+   - Post-state: RESOLVED_CONTINUE or RESOLVED_INVALID
+
+4.2.3.  Delegation Flow
+
+   Figure 1: Delegation State Machine
+
+                         +-----------+
+                         | INITIATED |
+                         +-----+-----+
+                               |
+                               | $Judge
+                               v
+                         +-----------+
+                         |   ACTIVE  |
+                         +-----+-----+
+                               |
+              +---------------+---------------+
+              | $Delegate (Init)              |
+              v                               |
+        +------------+                        |
+        | DELEGATING |<--Timeout/             |
+        |            |   Cancel               |
+        +-----+------+                        |
+              |                               |
+              | Accept Signature              |
+              v                               |
+        +------------+                        |
+        |  DELEGATED |------------------------+
+        +-----+------+
+              |
+              | $Terminate (Dual Sig)
+              v
+        +-------------+
+        | TERMINATED_*|
+        +-------------+
+              ^
+              | $Resolve
+        +-------------+
+        |DISPUTED_FROZEN|
+        +-------------+
+
+4.3.  Event Format
+
+4.3.1.  Common Fields
+
+   All JEP events MUST contain the following fields:
+
+   - jep_version: Protocol version (e.g., "1.0")
+   - event_id: Globally unique event identifier (UUID [RFC9562])
+   - event_type: Event type (Judge, Delegate, Terminate, Verify, Resolve)
+   - actor_id: Judgment actor identifier (typically DID)
+   - timestamp: Unix timestamp (seconds since epoch)
+   - prev_hash: Previous receipt hash (null for initial)
+   - primitive: Primitive-specific data
+   - proof: Cryptographic proof (signature)
+
+4.3.2.  Lifecycle Events
+
+   Judge Event:
+   - decision_hash: Hash of judgment content
+   - authority_scope: Authority scope URI
+   - valid_from/valid_until: Validity period
+   - state: "A" (ACTIVE)
+
+   Delegate Event:
+   - parent_receipt: Parent receipt reference
+   - delegatee_id: Delegatee identifier
+   - acceptance_signature: Delegatee acceptance (required for
+     completion)
+   - delegation_scope: Delegated authority scope
+
+   Terminate Event:
+   - termination_mode: "ARCHIVED" or "ERASED"
+   - pkd: Proof of Key Destruction (for ERASED mode)
+   - consensus_signatures: Dual signatures (for DELEGATED state)
+
+   Resolve Event:
+   - disputed_receipt: ID of disputed receipt
+   - resolution_type: "RESOLVED_CONTINUE" or "RESOLVED_INVALID"
+   - resolution_statement: Human-readable explanation
+   - governance_signatures: Multi-signature from governance authority
+   - new_anchor: ID of new anchor receipt (for RESOLVED_INVALID)
+
+4.3.3.  Verify Events
+
+   - target_receipt: Target receipt ID
+   - verification_mode: "open", "platform", or "dual"
+   - verification_result: "VALID", "INVALID", or "DISPUTED"
+   - verification_timestamp: Verification time
+   - verifier_id: Verifier identifier
+
+4.4.  Receipt Format
+
+4.4.1.  Receipt Structure
+
+   JEP receipts use JWS Compact Serialization [RFC7515]:
+
+      BASE64URL(UTF8(JWS Protected Header)) || '.' ||
+      BASE64URL(JWS Payload) || '.' ||
+      BASE64URL(JWS Signature)
+
+   Protected Header (Tier 1 - Public):
+   - alg: Signature algorithm (e.g., "EdDSA")
+   - typ: "JEP-Receipt"
+   - jep_v: JEP version
+   - jep_aid: Actor ID
+   - jep_op: Operation code
+   - jep_rid: Receipt ID
+
+   Payload (Tier 2 & 3 - Encrypted):
+   - Tier 2 data (authorization chain, contextual evidence)
+   - Tier 3 data (logic payload hash)
+
+4.4.2.  Hash Computation
+
+   Receipt canonicalization MUST use JCS (JSON Canonicalization
+   Scheme) [RFC8785] before hashing.
+
+   Hash algorithm: SHA-256 [RFC6234] (MUST be supported)
+   Alternative: SHA3-256 (MAY be supported)
+
+4.4.3.  Verification Algorithm
+
+   1.  Parse JWS structure
+   2.  Verify protected header signature using actor's public key
+   3.  Decrypt payload (if required for verification depth)
+   4.  Verify parent hash chain integrity
+   5.  Verify authorization chain signatures
+   6.  Verify timestamp within tolerance window
+   7.  Return verification result
+
+4.5.  Verification Modes
+
+   To accommodate different trust assumptions and performance
+   requirements, JEP supports three verification modes:
+
+   Table 4: Verification Modes
+
+   +--------+--------------------------------+-------------+-----------+
+   | Mode   | Verification Content             | Latency     | Output    |
+   +--------+--------------------------------+-------------+-----------+
+   | open   | Local cryptographic proof      | <1ms        | VALID/    |
+   |        | (hash chain + signature)       |             | INVALID   |
+   +--------+--------------------------------+-------------+-----------+
+   |        | Platform signature + local       | <10ms       | VALID/    |
+   | platform| proof                           |             | INVALID   |
+   +--------+--------------------------------+-------------+-----------+
+   | dual   | Simultaneous platform and open   | <100ms      | VALID/    |
+   |        | verification                    |             | INVALID/  |
+   |        |                                 |             | DISPUTED  |
+   +--------+--------------------------------+-------------+-----------+
+
+4.5.1.  open Mode
+
+   - Pure local cryptographic verification
+   - No external dependencies
+   - Suitable for cross-platform offline audit
+   - Minimal trust assumption: only cryptographic primitives
+
+4.5.2.  platform Mode
+
+   - Platform signature + local proof
+   - Suitable for internal monitoring, high-trust environments
+   - Higher performance than dual mode
+   - Trust assumption: platform not compromised
+
+4.5.3.  dual Mode
+
+   - Simultaneous platform and open verification
+   - Suitable for critical decisions, intrusion detection
+   - Conflict detection capability
+
+4.5.4.  DISPUTED State Handling
+
+   DISPUTED state occurs when platform verification passes but open
+   verification fails (or vice versa), indicating:
+
+   - Platform may be compromised (signature key leaked)
+   - Implementation bug (hash chain calculation error)
+   - Network partition causing timestamp inconsistency
+
+   Handling RECOMMENDED:
+   1. Trigger manual review
+   2. Freeze related responsibility chain
+   3. Initiate emergency response
+
+4.5.5.  Dispute Resolution and Recovery
+
+   JEP provides a structured recovery path from DISPUTED state
+   through authorized third-party intervention.
+
+4.5.5.1.  Resolution Event Primitive ($Resolve)
+
+   The $Resolve primitive allows authorized governance entities
+   to formally resolve disputes and restore chain operability.
+
+   Resolution types:
+   - "RESOLVED_CONTINUE": Dispute resolved, chain MAY continue
+     normal operation
+   - "RESOLVED_INVALID": Dispute resolved by invalidating
+     disputed receipts, chain MUST be re-initiated from last
+     known good state
+   - "RESOLVED_REPLACE": Dispute resolved by replacing disputed
+     receipts with corrected versions (requires governance
+     multi-signature)
+
+4.5.5.2.  Resolution Authority
+
+   Resolution authority MUST be pre-configured in Tier 2
+   authorization chain as "governance_principal" with explicit
+   resolution capability declaration.
+
+   Resolution receipts MUST include:
+   - target_dispute_receipt: ID of the disputed receipt
+   - resolution_type: One of the types defined above
+   - resolution_statement: Human-readable explanation
+   - governance_signatures: Array of signatures meeting
+     configured threshold (e.g., 2-of-3, 3-of-5)
+
+4.5.5.3.  Recovery Procedure
+
+   Upon receiving valid $Resolve receipt:
+
+   1. Verify governance signatures meet threshold
+   2. Verify resolution authority exists in authorization chain
+   3. Apply resolution:
+      - RESOLVED_CONTINUE: Unfreeze chain, mark disputed
+        receipt as "verified_with_resolution"
+      - RESOLVED_INVALID: Unfreeze chain, mark disputed
+        receipt as "invalid", require re-initiation
+      - RESOLVED_REPLACE: Replace disputed receipt with
+        corrected version, preserve chain continuity
+   4. Generate resolution confirmation receipt for audit trail
+
+4.5.5.4.  Automated Recovery Conditions
+
+   Implementations MAY support automated recovery for specific
+   dispute types without governance intervention:
+
+   - Clock skew disputes: If dual mode conflict is due to
+     timestamp difference < 2x the configured tolerance window, and
+     platform mode timestamp is within window, MAY auto-resolve to
+     platform mode with SUSPECTED flag
+   - Temporary network partition: If open mode verification
+     fails due to network timeout, and platform mode succeeds,
+     MAY retry open mode up to 3 times before escalating
+
+   Automated recovery MUST be logged as "auto_resolved" with
+   full diagnostic data in Tier 2.
+
+4.6.  Error Handling
+
+   Table 5: JEP Error Codes
+
+   +--------------------+---------------------------------------------+
+   | Error Code         | Scenario                                    |
+   +--------------------+---------------------------------------------+
+   | INVALID_SIGNATURE  | Signature verification failed               |
+   | BROKEN_CHAIN       | Parent reference broken or tampered         |
+   | UNAUTHORIZED_      | Delegating principal not in authorization   |
+   | DELEGATION         | chain                                       |
+   | INVALID_           | Insufficient termination permission (e.g.,  |
+   | TERMINATION        | missing dual signature in DELEGATED state)  |
+   | PAYLOAD_ERASED     | Tier 3 payload compliance-erased, only PKD    |
+   |                    | provided                                    |
+   | CHAIN_TOO_DEEP     | Delegation level exceeds limit (10 levels)    |
+   |                    |                                             |
+   | EXPIRED_RECEIPT    | Receipt timestamp outside trusted window    |
+   | DISPUTED           | platform and open verification conflict       |
+   |                    | (dual mode)                                 |
+   | RESOLUTION_        | Governance resolution applied, chain status   |
+   | REQUIRED           | changed per resolution type                 |
+   +--------------------+---------------------------------------------+
+
+4.7.  Time Trust Anchor Mechanism
+
+   To mitigate risks from single time source failures or NTP
+   deviations, JEP implementations MAY implement a Time Trust Anchor
+   (TTA) mechanism using multiple independent time sources.
+
+4.7.1.  Time Source Configuration
+
+   TTA-enabled implementations MUST configure at least two of the
+   following time sources:
+
+   - Local NTP with authenticated NTS (Network Time Security)
+   - SCITT transparency service timestamp (if SCITT usage
+     enabled, see Section 5.2)
+   - Hardware-backed trusted clock (e.g., TPM RTC, TEE secure
+     clock, or hardware security module clock)
+
+4.7.2.  Time Consensus Algorithm
+
+   When multiple time sources are configured, implementations MUST
+   apply the following consensus algorithm:
+
+   1. Collect timestamps from all available sources
+   2. Discard outliers exceeding 2x the configured tolerance window
+   3. Select the median timestamp as authoritative
+   4. If sources disagree beyond tolerance window, enter
+      SUSPECTED state and trigger manual review
+
+4.7.3.  Dynamic Tolerance Adjustment
+
+   Implementations MAY support dynamic tolerance window adjustment
+   based on historical time source stability:
+
+   - Baseline window: 5 seconds (as specified in Section 3.7)
+   - Minimum window: 1 second (for high-stability environments)
+   - Maximum window: 30 seconds (for degraded network conditions)
+
+   Window adjustments MUST be logged in Tier 2 contextual evidence
+   for audit traceability.
+
+
+5.  Extensions and Integration
+
+5.1.  Extension Mechanism
+
+   JEP supports protocol extensions through IANA registration.
+   Extensions MUST NOT violate core protocol semantics.
+
+5.2.  SCITT Usage
+
+   SCITT [draft-ietf-scitt-architecture] may provide timestamp
+   services for JEP receipts. This is optional; JEP verification
+   does not require SCITT integration.
+
+5.3.  RATS Usage
+
+   RATS [RFC9334] attestations may be recorded in Tier 2 contextual
+   evidence. This is optional.
+
+5.3.1.  TEE Evidence Encoding in Tier 2
+
+   When TEE environment evidence is included in Tier 2
+   contextual_evidence, it MUST be encoded according to the Entity
+   Attestation Token (EAT) format [RFC9711] or as raw measurements
+   following the encoding specified below.
+
+   EAT-based encoding (RECOMMENDED):
+   - Use EAT as defined in RFC 9711
+   - Include eat_nonce for freshness
+   - Include oemid and hwversion for device identification
+   - Include measurements in manifests claim or dedicated
+     measurement claims
+
+   Raw measurement encoding (for constrained environments):
+   - tee_type: String identifying TEE type ("Intel-TDX",
+     "AMD-SEV-SNP", "ARM-CCA", "TPM2")
+   - measurement_values: Object containing TEE-specific measurements
+
+5.3.2.  TEE-Specific Measurement Formats
+
+   Intel TDX:
+   - mr_td: 48-byte measurement of guest firmware image (hex
+     encoded string)
+   - rtmrs: Array of 4 runtime measurement registers, each 48-byte
+     hex encoded
+   - tee_tcb_svn: 16-byte security version number (hex encoded)
+   - report_data: 64-byte user data or nonce (hex encoded)
+
+   AMD SEV-SNP:
+   - measurement: 48-byte launch measurement (hex encoded)
+   - report_id: 32-byte unique report identifier (hex encoded)
+   - report_id_ma: 32-byte migration agent report ID (hex encoded)
+   - reported_tcb: 8-byte reported TCB version (hex encoded)
+   - chip_id: 64-byte unique chip identifier (hex encoded)
+
+   ARM CCA:
+   - realm_initial_measurement: 32-byte realm initial measurement
+   - rim_extend_count: Integer, extension count
+   - personalization_value: 64-byte personalization value
+
+   TPM2:
+   - pcr_values: Object mapping PCR index (0-23) to SHA-256 hash
+   - quote_signature: Base64-encoded TPM quote signature
+   - ak_cert: Attestation Key certificate (PEM format)
+
+5.3.3.  TEE Binding Verification Procedure
+
+   When verifying TEE evidence in Tier 2, implementations MUST:
+
+   1. Verify EAT signature or TPM quote signature using known
+      public keys or endorsement certificates
+   2. Verify eat_nonce or report_data matches the receipt's
+      jep_rid (receipt ID) to prevent replay attacks
+   3. Verify measurements against reference values from
+      manufacturer or deployment-specific policy
+   4. Verify TEE security version numbers meet minimum
+      requirements configured for the use case
+
+5.4.  Identity Framework Usage
+
+   Table 6: Identity Framework Mapping
+
+   +----------------+---------------+--------------------------------+
+   | Identity       | Tier 1        | Tier 2                         |
+   | Standard       | Mapping       | Mapping                        |
+   +----------------+---------------+--------------------------------+
+   | DID            | jep_aid       | Authorization chain DID        |
+   |                |               | resolution                     |
+   +----------------+---------------+--------------------------------+
+   | OAuth 2.0      | jep_aid +     | Token scope verification       |
+   |                | token ref     |                                |
+   +----------------+---------------+--------------------------------+
+   | AIP            | jep_aid +     | Agent capability chain         |
+   |                | capability    |                                |
+   |                | declaration   |                                |
+   +----------------+---------------+--------------------------------+
+   | X.509          | Certificate   | Certificate chain verification |
+   |                | fingerprint   | path                           |
+   +----------------+---------------+--------------------------------+
+
+5.5.  Extension Specification Requirements
+
+   JEP extensions MUST comply with the following mandatory
+   specification requirements to ensure interoperability:
+
+5.5.1.  Extension Metadata
+
+   Every JEP extension MUST include the following metadata fields
+   in the extension definition:
+
+   - semantics: Textual description of behavioral changes introduced
+     by the extension, including any modifications to state machine
+     transitions, verification procedures, or receipt formats.
+
+   - compatibility: Declaration of compatibility level with core
+     protocol, using one of the following values:
+     * "full": Extension does not alter core protocol semantics;
+       receipts remain fully interoperable with non-extension
+       implementations
+     * "wire": Extension adds new fields but does not modify
+       existing field processing; receipts MAY be processed by
+       non-extension implementations with graceful degradation
+     * "none": Extension modifies core protocol semantics;
+       receipts REQUIRE extension-aware implementations for
+       correct processing
+
+   - version: Extension version following semantic versioning
+     (MAJOR.MINOR.PATCH)
+
+   - requires: Array of prerequisite extension identifiers, if any
+
+5.5.2.  IANA Registration Requirements
+
+   Extensions MUST be registered via the "JEP Extension Registry"
+   (see Section 8.4) and MUST NOT be deployed in production
+   environments prior to registration completion.
+
+5.5.3.  Compatibility Testing Requirements
+
+   Extensions declaring "full" or "wire" compatibility MUST
+   provide test vectors demonstrating interoperability with
+   unextended implementations.  Extensions declaring "none"
+   compatibility MUST provide reference implementation and
+   migration guide.
+
+
+6.  Security Considerations
+
+   This section follows RFC 3552 guidelines for security
+   considerations in protocol specifications.
+
+6.1.  Threat Model
+
+   JEP security design assumes a semi-trusted distributed network
+   environment.  The protocol MUST defend against:
+
+   - Insider Attackers: Legitimate judgment actors may maliciously
+     delegate to evade responsibility ("responsibility dumping"), or
+     exploit controlled environments to forge/tamper contextual
+     evidence.
+
+   - External Attackers: Third parties may intercept and replay
+     legitimate receipts, or perform traffic analysis through Tier 1
+     public metadata to infer judgment behavior frequency and business
+     logic.
+
+   - Computational Threats: With quantum computing development,
+     existing elliptic curve-based (e.g., Ed25519) digital
+     signatures may face security degradation or instant compromise.
+
+   Trust Assumptions:
+   - Judgment actors are responsible for private key security
+   - Time sources are partially trusted (within tolerance window)
+   - Optional anchoring services (e.g., SCITT) are trusted
+
+6.2.  Key Management
+
+6.2.1.  Signature Keys
+
+   - MUST be stored in hardware trust root (HSM/TEE)
+   - Rotation period: RECOMMENDED 1 year
+   - Compromise response: Immediate $Terminate with logical
+     invalidation
+
+6.2.2.  Encryption Keys (Tier 3)
+
+   - MAY be stored in external KMS
+   - Erasure execution: Deterministic destruction with PKD generation
+
+6.2.3.  Key Compromise Containment
+
+   Once judgment actor signature key is compromised, attackers may
+   forge historical judgments.
+
+   Defense: JEP supports "logical circuit breaker" through $Terminate
+   primitive:
+
+   - Execution Authority: Parent principal in authorization chain
+     (where compromised key is child) issues termination receipt
+   - Effect Scope: Invalidates all receipts generated by that key
+     after termination timestamp
+   - Pre-timestamp receipts: Effectively unaffected, but auditors
+     SHOULD assess risk combining business context and contextual
+     evidence
+   - Root Principal Compromise: Catastrophic event requiring
+     pre-configured governance multi-signature or timelock emergency
+     handling
+
+6.3.  Cryptographic Mechanisms
+
+6.3.1.  Algorithm Selection Rationale
+
+   - Ed25519: High performance, high security, constant-time
+     execution, widely supported
+   - SHA-256: Broad support, sufficient security margin
+   - ECDSA with P-256: Alternative for FIPS 140-2 compliance
+   - SM2: Chinese commercial cryptography compliance
+
+6.3.2.  Algorithm Agility
+
+   JEP Protected Header alg field supports future migration.
+   Algorithm upgrade only affects Tier 1 signature encapsulation,
+   without impacting Tier 2 (authorization chain) and Tier 3
+   (payload hash) logical anchoring.
+
+6.4.  Attack Analysis
+
+   Table 7: Attack Matrix
+
+   +----------------+--------------------------------+---------------+
+   | Attack Type    | Description                    | Mitigation    |
+   +----------------+--------------------------------+---------------+
+   | Signature      | Attacker forges Ed25519         | Key in        |
+   | Forgery        | signature                      | HSM/TEE       |
+   +----------------+--------------------------------+---------------+
+   | Hash Collision | Find different judgments with   | Use SHA-256   |
+   |                | same hash                       |               |
+   +----------------+--------------------------------+---------------+
+   | Replay Attack  | Reuse old receipts              | UUID+timestamp|
+   |                |                                | window        |
+   +----------------+--------------------------------+---------------+
+   | Man-in-the-    | Tamper with receipts in         | TLS+signature |
+   | Middle         | transit                        |               |
+   +----------------+--------------------------------+---------------+
+   | Denial of      | Construct deep delegation       | 10-level depth|
+   | Service        | chains                         | limit         |
+   +----------------+--------------------------------+---------------+
+   | Time Tampering | Forge judgment timestamps       | SCITT         |
+   |                |                                | anchoring     |
+   |                |                                | (optional)    |
+   +----------------+--------------------------------+---------------+
+   | Responsibility | Mandator unilateral             | Mandatory     |
+   | Dumping        | delegation without consent      | dual-signature|
+   +----------------+--------------------------------+---------------+
+
+6.5.  Post-Quantum Migration
+
+   JEP Tier 1 Header alg field reserves algorithm agility for
+   migration to post-quantum signatures (Dilithium, Falcon, or
+   SPHINCS+).
+
+   Timeline: Ed25519 remains secure until NIST post-quantum standards
+   are widely deployed.  Implementations SHOULD monitor NIST
+   standardization progress.
+
+
+7.  Privacy Considerations
+
+   This section follows RFC 6973 guidelines for privacy
+   considerations in protocol specifications.
+
+7.1.  Privacy Risk Analysis
+
+   - Observability Risk: Tier 1 actor ID may enable long-term
+     tracking
+   - Disclosure Risk: Tier 2 authorization chain may expose
+     organizational internal structure
+   - Identification Risk: Behavior patterns may infer real identity
+   - Aggregation Risk: Multiple receipt correlation may reconstruct
+     complete business graph
+
+7.2.  Data Minimization
+
+   Receipts MUST NOT contain non-essential fields.  All fields serve
+   explicit accountability purposes.
+
+   Third-party audit example:
+   - Auditor needs to verify responsibility chain -> MAY access Tier 2
+   - Auditor does not need judgment content -> MUST NOT access Tier 3
+
+7.3.  Cryptographic Erasure Mechanism
+
+   Execution $Terminate (ERASED mode) leaves "logical tombstones" in
+   responsibility chain:
+
+   - Tier 3 payload content computationally unrecoverable through key
+     destruction
+   - Retains undecryptable hash anchor
+   - Preserves Tier 1 (public governance) and Tier 2 (accountability
+     path)
+
+   This design proves "compliant erasure obligation fulfilled" during
+   regulatory audit while retaining minimal accountability evidence
+   of "who was responsible for what when."
+
+7.4.  Deployment Recommendations
+
+   - Public Deployment: Use ephemeral DID, rotation period
+     RECOMMENDED 24 hours
+   - Private Deployment: MAY use fixed DID, relying on network
+     isolation
+   - Cross-border Deployment: Consider data localization requirements
+
+   Privacy Policy Template:
+   "This system uses JEP to record AI judgments.  Collected metadata
+   includes: ephemeral agent ID (periodically rotated), judgment
+   time (second precision), authorization relationships (encrypted
+   storage).  Judgment content is stored only as hash digest;
+   original text is controlled by you.  You have the right to
+   request erasure; we will destroy decryption keys and provide
+   proof."
+
+7.5.  EU Regulatory Compliance Analysis
+
+   This protocol was designed with compatibility with EU major
+   regulatory frameworks in mind, based on 2026 latest regulatory
+   dynamics and ENISA Data Protection Engineering reports and EDPB
+   Right to be Forgotten Guidelines.
+
+7.5.1.  GDPR Compliance Mapping
+
+   Table 8: JEP to GDPR Core Provisions Mapping
+
+   +-------------------+------------------------------------------+------------------+
+   | GDPR Provision    | JEP Implementation Mechanism             | Compliance Level |
+   +-------------------+------------------------------------------+------------------+
+   | Accountability    | Four-primitive chain (4.1) + $Verify     | Technical        |
+   | (Art.5(2))        | auditability                             | Measures         |
+   |                   |                                          | Implemented      |
+   +-------------------+------------------------------------------+------------------+
+   | Privacy by Design | Three-tier architecture (Section 3) +    | Technical        |
+   | (Art.25)          | data minimization (7.2)                  | Measures         |
+   |                   |                                          | Implemented      |
+   +-------------------+------------------------------------------+------------------+
+   | Right to be       | Cryptographic erasure (7.3) + PKD proof  | Technical        |
+   | Forgotten (Art.17)|                                          | Measures         |
+   |                   |                                          | Implemented      |
+   +-------------------+------------------------------------------+------------------+
+   | Data Subject      | Tier 3 hash anchor + origin system       | Supplementary    |
+   | Access (Art.15)   | interface (deployment required)          | Measures Needed  |
+   +-------------------+------------------------------------------+------------------+
+   | Data Security     | TEE binding (5.3) + hardware proof       | Technical        |
+   | (Art.32)          | (G.4.2)                                  | Measures         |
+   |                   |                                          | Implemented      |
+   +-------------------+------------------------------------------+------------------+
+
+   The cryptographic erasure mechanism specifically addresses the
+   pain point that blockchain technology struggles with the right to
+   be forgotten: after destroying Tier 3 decryption keys, even if
+   ciphertext still exists, content is computationally unreadable,
+   while retaining Tier 1/2 evidence proving "compliance erasure
+   obligation fulfilled."  This design references ENISA "Data
+   Protection Engineering" recommendations on "achieving data
+   protection principles through advanced cryptographic techniques."
+
+7.5.2.  EU AI Act Compliance Mapping
+
+   For high-risk AI system transparency obligations effective
+   August 2, 2026:
+
+   - AI Agent Collaboration Accountability: $Delegate primitive
+     (4.1.2) supports multi-AI agent responsibility tracing,
+     satisfying AI Act Article 12 "traceability" requirements
+
+   - Bias Detection Sensitive Data Processing: Three-tier
+     architecture ensures sensitive judgment content only stored as
+     hash (Tier 3), auditors only access metadata (Tier 2),
+     compliant with EDPB guidelines on data minimization and privacy
+     by design
+
+   - Synthetic Content Marking: JEP responsibility chain can serve
+     as infrastructure for deepfake accountability (requires
+     coordination with content watermarking technology)
+
+   - Human Oversight Record: AI Act extension (G.5.4) supports
+     recording human supervisor ID and conformity assessment
+     identifiers
+
+7.5.3.  Judicial Recognition of Cryptographic Erasure
+
+   The cryptographic erasure mechanism (7.3) through "logical
+   tombstone" design, while destroying decryption keys, retains:
+
+   - Tier 1: Public agent ID (rotatable) - proves "who"
+   - Tier 2: Authorization chain and timestamp (encrypted) - proves
+     "when, based on what authorization"
+   - PKD (Proof of Key Destruction) - proves "compliant deletion"
+
+   This design references ENISA "Data Protection Engineering" report
+   technical recommendations on "encryption techniques for deletion
+   rights" and EDPB "Right to be Forgotten Guidelines" on technical
+   measure sufficiency standards.  EDPB has listed "right to erasure"
+   as 2025 priority enforcement theme, and JEP's cryptographic
+   erasure mechanism provides organizations with verifiable
+   compliance tools.
+
+   This design is intended to support compliance demonstration
+   with erasure obligations, though final recognition depends on
+   specific jurisdictional interpretation and regulatory guidance.
+
+7.5.4.  Deployment Recommendations for EU Compliance
+
+   To maximize EU compliance, JEP-01 deployers should:
+
+   1. Enable Appendix G.5.1 Jurisdiction Marking extension,
+      explicitly marking governing law and retention period
+      (recommended 2555 days/7 years for GDPR scenarios)
+
+   2. Configure multi-source time consensus (4.7), using SCITT
+      anchoring or hardware clock to enhance timestamp credibility,
+      meeting EDPB requirements for accurate time recording
+
+   3. For high-risk AI scenarios, mandatorily enable TEE binding
+      (5.3) and hardware proof (G.4.2), meeting AI Act security
+      trust requirements for high-risk systems
+
+   4. Establish data subject access interface, providing Tier 3
+      original content through origin system (as JEP only stores
+      hash), satisfying Art.15 access rights
+
+   5. Configure GDPR compliance proof extension (G.5.3), recording
+      DPO signatures and audit trails, enhancing court admissibility
+
+
+8.  IANA Considerations
+
+   This section follows RFC 8126 guidelines for IANA considerations.
+
+8.1.  Media Type Registration
+
+   IANA is requested to add the following entry to the "Media Types"
+   registry:
+
+   Type name: application
+   Subtype name: jep+json
+   Required parameters: N/A
+   Optional parameters: charset (default is UTF-8)
+   Encoding considerations: Follows RFC 8259 (JSON)
+   Security considerations: See Section 6 of this document
+   Interoperability considerations: JEP receipts support JWS Compact
+      Serialization (RFC 7515)
+   Published specification: This document
+   Applications that use this media type: Judgment Event Protocol
+      implementations, AI governance systems, compliance audit
+      platforms
+   Fragment identifier considerations: N/A
+   Additional information: None
+   Person and email address to contact for further information:
+      Yuqiang Wang <signal@humanjudgment.org>
+   Intended usage: COMMON
+   Restrictions on usage: None
+   Author: Yuqiang Wang
+   Change controller: IETF
+
+8.2.  JWS Header Parameters Registration
+
+   IANA is requested to add the following entries to the "JSON Web
+   Signature and Encryption Header Parameters" registry per RFC 7515
+   Section 9.1:
+
+   +-----------+--------------------------------+-------------------+
+   | Parameter | Description                    | Header Parameter  |
+   | Name      |                                | Location          |
+   +-----------+--------------------------------+-------------------+
+   | jep_v     | JEP protocol version (e.g.,    | JOSE Header       |
+   |           | "1.0")                         |                   |
+   +-----------+--------------------------------+-------------------+
+   | jep_aid   | Actor identifier URI           | JOSE Header       |
+   |           | (typically a DID)              |                   |
+   +-----------+--------------------------------+-------------------+
+   | jep_op    | Operation code: "judge",       | JOSE Header       |
+   |           | "delegate", "terminate",       |                   |
+   |           | "verify"                       |                   |
+   +-----------+--------------------------------+-------------------+
+   | jep_rid   | Receipt identifier (UUID)      | JOSE Header       |
+   +-----------+--------------------------------+-------------------+
+
+   Change controller: IETF
+   Specification document(s): This document, Section 4.4.1
+
+8.3.  JEP Error Code Registry
+
+   IANA is requested to create a new sub-registry named "Judgment
+   Event Protocol Error Codes" under "Protocol Registries".
+
+   Registration procedure: Specification Required (RFC 8126)
+   Change controller: IETF
+
+   Initial registrations:
+
+   +--------------------+---------------------------------------------+
+   | Error Code         | Description                                 |
+   +--------------------+---------------------------------------------+
+   | INVALID_SIGNATURE  | Cryptographic signature verification          |
+   |                    | failed, including key mismatch or data      |
+   |                    | tampering                                   |
+   +--------------------+---------------------------------------------+
+   | BROKEN_CHAIN       | Parent receipt reference non-existent or    |
+   |                    | hash mismatch                               |
+   +--------------------+---------------------------------------------+
+   | UNAUTHORIZED_      | Delegating principal not in current         |
+   | DELEGATION         | authorization chain                         |
+   +--------------------+---------------------------------------------+
+   | INVALID_           | Insufficient termination permission (e.g.,  |
+   | TERMINATION        | missing dual signature in DELEGATED state)  |
+   +--------------------+---------------------------------------------+
+   | PAYLOAD_ERASED     | Tier 3 payload compliance-erased, only PKD  |
+   |                    | provided                                    |
+   +--------------------+---------------------------------------------+
+   | CHAIN_TOO_DEEP     | Delegation level exceeds system limit         |
+   |                    | (10 levels)                                 |
+   +--------------------+---------------------------------------------+
+   | EXPIRED_RECEIPT    | Receipt timestamp outside trusted window    |
+   +--------------------+---------------------------------------------+
+   | DISPUTED           | platform and open verification conflict      |
+   |                    | (dual mode)                                 |
+   +--------------------+---------------------------------------------+
+   | RESOLUTION_        | Governance resolution applied, chain status   |
+   | REQUIRED           | changed per resolution type                 |
+   +--------------------+---------------------------------------------+
+
+   Future extensions: New error codes require IETF draft or RFC
+   submission, describing error scenarios, trigger conditions, and
+   handling recommendations.
+
+8.4.  JEP Extension Registry
+
+   IANA is requested to create a new sub-registry named "JEP
+   Extensions" under "Protocol Registries".
+
+   Registration procedure: Specification Required (RFC 8126)
+   Change controller: IETF
+
+   Registry fields:
+   - Extension Identifier: Unique URI (e.g., urn:ietf:jep:ext:NAME)
+   - Semantics Description: URL to specification document
+   - Compatibility Level: "full" | "wire" | "none"
+   - Version: Semantic version string
+   - Registration Date: ISO 8601 date
+   - Contact: Email of registrant
+
+   Initial registrations: None (reserved for future use)
+
+
+9.  References
+
+9.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+              RFC 6749, October 2012,
+              <https://www.rfc-editor.org/info/rfc6749>.
+
+   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", RFC 7515, May 2015,
+              <https://www.rfc-editor.org/info/rfc7515>.
+
+   [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
+              RFC 7516, May 2015,
+              <https://www.rfc-editor.org/info/rfc7516>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, June 2017,
+              <https://www.rfc-editor.org/info/rfc8126>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, May 2017,
+              <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC8259]  Bray, T., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", STD 90, RFC 8259, December 2017,
+              <https://www.rfc-editor.org/info/rfc8259>.
+
+   [RFC8785]  Rundgren, A., Jordan, B., and S. Erdtman, "JSON
+              Canonicalization Scheme (JCS)", RFC 8785, June 2020,
+              <https://www.rfc-editor.org/info/rfc8785>.
+
+   [RFC9334]  Birkholz, H., et al., "Remote ATtestation procedureS
+              (RATS) Architecture", RFC 9334, January 2023,
+              <https://www.rfc-editor.org/info/rfc9334>.
+
+   [RFC9562]  Davis, K., et al., "Universally Unique IDentifiers
+              (UUIDs)", RFC 9562, May 2024,
+              <https://www.rfc-editor.org/info/rfc9562>.
+
+   [RFC9711]  Lundblade, L., et al., "The Entity Attestation Token
+              (EAT)", RFC 9711, March 2025,
+              <https://www.rfc-editor.org/info/rfc9711>.
+
+9.2.  Informative References
+
+   [HJS-00]   Wang, Y., "Human Judgment System (HJS): A Judgment
+              Event Protocol", draft-wang-hjs-judgment-event-00,
+              March 2026.
+
+   [draft-ietf-scitt-architecture]
+              Birkholz, H., et al., "Supply Chain Integrity,
+              Transparency, and Trust (SCITT) Architecture",
+              Work in Progress.
+
+   [DID-CORE] Sporny, M., et al., "Decentralized Identifiers (DIDs)
+              v1.0", W3C Recommendation, July 2022.
+
+   [GDPR-2016]
+              European Parliament, "General Data Protection Regulation
+              (GDPR)", 2016.
+
+   [EU-AI-ACT]
+              European Commission, "Artificial Intelligence Act",
+              2024.
+
+   [draft-ailex-vap-legal-ai-provenance]
+              Ailin, A., et al., "Verifiable AI Provenance (VAP)
+              Framework", Work in Progress.
+
+   [draft-li-dmsc-inf-architecture]
+              Li, Y., Wang, A., et al., "Dynamic Multi-agent Secured
+              Collaboration (DMSC) Infrastructure Architecture",
+              Work in Progress.
+
+   [AIP-CORE] Agent Identity Protocol Working Group, "Agent Identity
+              Protocol (AIP) Core Specification", 2025,
+              <https://aip.dev/>.
+
+   [ENISA-DPE]
+              European Union Agency for Cybersecurity, "Engineering
+              Personal Data Sharing - How to support GDPR compliance
+              through technological tools", ENISA Report, 2023,
+              <https://www.enisa.europa.eu/publications/data-sharing-report>.
+
+   [EDPB-RTBF]
+              European Data Protection Board, "Guidelines 5/2019 on
+              the criteria of the Right to Be Forgotten in the search
+              engines cases under the GDPR (Version 2.0)", 2020,
+              <https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-52019-criteria-right-be-forgotten-search_en>.
+
+   [EDPB-CEF-2025]
+              European Data Protection Board, "EDPB launches
+              Coordinated Enforcement Framework action on the right to
+              erasure", 2025,
+              <https://www.edpb.europa.eu/news/news/2025/edpb-launches-coordinated-enforcement-framework-action-right-erasure_en>.
+
+   [VDF-PIETRZAK]
+              Pietrzak, K., "Simple Verifiable Delay Functions",
+              IACR CRYPTO 2019,
+              <https://eprint.iacr.org/2018/627>.
+
+   [VDF-WESOLOWSKI]
+              Wesolowski, B., "Efficient Verifiable Delay Functions",
+              IACR EUROCRYPT 2019,
+              <https://eprint.iacr.org/2018/623>.
+
+   [FIDO2]    FIDO Alliance, "FIDO2: Web Authentication (WebAuthn)",
+              2019, <https://fidoalliance.org/fido2/>.
+
+   [ISO30107] ISO/IEC, "ISO/IEC 30107-3:2017 Information technology
+              — Biometric presentation attack detection — Part 3:
+              Testing and reporting", 2017.
+
+   [CAP-SRP]  [To be added when CAP-SRP draft published]
+              "Cryptographic Accountability Protocol for
+              Safety-Related Refusals", Work in Progress.
+
+
+Appendix A.  Performance Benchmarks
+
+   This section summarizes performance benchmarks from JEP Reference
+   Implementation v1.0.  All tests conducted with hardware
+   specifications detailed below to enable reproducibility.
+
+A.1.  Test Environment Specifications
+
+   Constrained Node:
+   - CPU: Intel Xeon E5-2680 v4 @ 2.4 GHz (single-core test)
+   - Memory: 512MB DDR4-2400
+   - Storage: SATA SSD (sequential read: 550 MB/s, write: 520 MB/s)
+   - Network: Local loopback (0.1ms RTT)
+
+   Standard Server:
+   - CPU: Intel Xeon Gold 6248R @ 3.0 GHz (16 cores, 32 threads)
+   - Memory: 64GB DDR4-2933 (quad-channel, 93.8 GB/s bandwidth)
+   - Storage: NVMe SSD (sequential read: 3.5 GB/s, write: 3.0 GB/s)
+   - Network: 10GbE (0.05ms RTT within datacenter)
+
+   Simulated Distributed Environment:
+   - Topology: 5 geographically distributed nodes
+   - Inter-node latency: 10-50ms RTT
+   - Packet loss: 0.1% (occasional network partition simulation)
+
+A.2.  Receipt Generation Performance
+
+   +----------------------------------+--------------------------------+
+   | Metric                           | Result                         |
+   +----------------------------------+--------------------------------+
+   | $Judge primitive generation      | Average 4.5 ms (including    |
+   | latency                          | Ed25519 signature and Tier 1/2 |
+   |                                  | data encapsulation)            |
+   +----------------------------------+--------------------------------+
+   | Throughput (standard server-     | 12,000+ complete receipts per  |
+   | grade hardware, 16-core)         | second                         |
+   +----------------------------------+--------------------------------+
+
+   Comparison baseline: Certificate Transparency log verification
+   typically achieves 5,000-8,000 entries/second on comparable
+   hardware.  JEP's 12,000+ receipts/second demonstrates efficient
+   cryptographic pipeline design.
+
+A.3.  Verification Latency by Depth
+
+   +----------------------------------+-------------+------------------+
+   | Verification Scenario            | Latency     | Notes            |
+   +----------------------------------+-------------+------------------+
+   | open mode (single-level)         | < 1 ms      | Pure local       |
+   |                                  |             | cryptographic    |
+   |                                  |             | verification     |
+   +----------------------------------+-------------+------------------+
+   | platform mode (single-level)     | < 10 ms     | Platform         |
+   |                                  |             | signature +      |
+   |                                  |             | local proof      |
+   +----------------------------------+-------------+------------------+
+   | dual mode (single-level)         | < 100 ms    | Dual             |
+   |                                  |             | verification,    |
+   |                                  |             | conflict         |
+   |                                  |             | detection        |
+   +----------------------------------+-------------+------------------+
+   | 10-level delegation chain full   | Median 120  | Asynchronous     |
+   | chain verification (open mode)   | ms          | parallel parent  |
+   |                                  |             | receipt fetch,   |
+   |                                  |             | network RTT      |
+   |                                  |             | limited          |
+   +----------------------------------+-------------+------------------+
+
+   Storage: Standard $Judge receipt size approximately 1.2 KB - 2.5
+   KB, suitable for high-frequency notarization scenarios.
+
+
+Appendix B.  Dispute Handling Framework
+
+   When $Verify produces disputed results (e.g., signature valid but
+   contextual evidence invalid, or dual mode returns DISPUTED), the
+   following multi-tier handling flow is RECOMMENDED:
+
+B.1.  Logical Degradation
+
+   If receipt is marked TERMINATED_ERASED, verification nodes MUST
+   accept PKD (Proof of Key Destruction) as legitimate explanation
+   for Tier 3 content absence.
+
+B.2.  Conflict Detection and Response
+
+   If dual mode returns DISPUTED (platform vs. open verification
+   conflict):
+   1. Immediate freeze: Suspend subsequent operations on related
+      responsibility chain
+   2. Root cause analysis: Compare platform signature and open hash
+      chain timestamps and computation paths
+   3. Emergency response: Trigger platform security team audit,
+      checking for private key compromise or implementation bugs
+
+B.3.  Evidence Re-evaluation
+
+   If TEE binding check fails (non-disputed scenario), system SHOULD
+   trigger SUSPECTED mode and automatically retrieve original RATS
+   measurement reports from Tier 2 for offline re-evaluation.
+
+B.4.  Sovereignty Traceback
+
+   For high-risk disputes, trace back through Tier 2 authorization
+   chain to initial human authorization principal (Human Mandator) to
+   establish ultimate legal responsibility attribution.
+
+
+Appendix C.  Implementation Risks and Mitigations
+
+   +----------------+--------------------------------+----------------+
+   | Risk Category  | Risk Description               | Recommended    |
+   |                |                                | Mitigation     |
+   +----------------+--------------------------------+----------------+
+   | Clock Drift    | Distributed node clock         | Mandatory node |
+   |                | desynchronization causing      | sync to NTS or |
+   |                | EXPIRED_RECEIPT or DELEGATING  | hardware       |
+   |                | timeout misjudgment            | trusted clock  |
+   |                |                                | source,        |
+   |                |                                | reasonable     |
+   |                |                                | tolerance      |
+   |                |                                | window (+-5s)  |
+   +----------------+--------------------------------+----------------+
+   | State          | In asynchronous networks,      | Verifiers      |
+   | Inconsistency  | $Terminate propagation delay   | SHOULD execute |
+   |                | causing brief "dual-live"      | "backward      |
+   |                | responsibility, or DELEGATING  | probing" using |
+   |                | race conditions                | latest         |
+   |                |                                | termination or |
+   |                |                                | delegation     |
+   |                |                                | completion     |
+   |                |                                | receipt as     |
+   |                |                                | logical truth  |
+   |                |                                | anchor         |
+   +----------------+--------------------------------+----------------+
+   | Key Loss       | Judgment actor loses private   | Pre-configure  |
+   |                | key, unable to issue $Terminate| "emergency     |
+   |                | or complete DELEGATING         | termination"   |
+   |                | acceptance signature           | permission for |
+   |                |                                | parent         |
+   |                |                                | principal in   |
+   |                |                                | Tier 2 chain,  |
+   |                |                                | achieving      |
+   |                |                                | logical        |
+   |                |                                | circuit        |
+   |                |                                | breaker;       |
+   |                |                                | DELEGATING     |
+   |                |                                | supports       |
+   |                |                                | Mandator       |
+   |                |                                | active         |
+   |                |                                | cancellation   |
+   +----------------+--------------------------------+----------------+
+   | Storage        | Massive $Delegate-generated    | Implement      |
+   | Explosion      | receipt chains consuming       | "logical       |
+   |                | excessive auditor storage      | tombstone      |
+   |                |                                | compression    |
+   |                |                                | strategy",     |
+   |                |                                | retaining only |
+   |                |                                | critical       |
+   |                |                                | responsibility |
+   |                |                                | turning        |
+   |                |                                | points,        |
+   |                |                                | executing hash |
+   |                |                                | pruning on     |
+   |                |                                | historical     |
+   |                |                                | long chains    |
+   +----------------+--------------------------------+----------------+
+   | Verification   | Misusing platform mode in      | Mandatory dual |
+   | Mode Misuse    | high-risk scenarios, unable to | mode for       |
+   |                | detect platform compromise     | critical       |
+   |                |                                | operations,    |
+   |                |                                | enable         |
+   |                |                                | disputed       |
+   |                |                                | automatic      |
+   |                |                                | alerting at    |
+   |                |                                | deployment     |
+   +----------------+--------------------------------+----------------+
+
+
+Appendix D.  Compatibility with HJS-00
+
+   +-------------------+---------------+--------------------------------+
+   | HJS-00 Feature    | JEP-01 Status | Migration Notes                |
+   +-------------------+---------------+--------------------------------+
+   | Four primitives   | Fully         | No modification required       |
+   | (Judge/Delegate/  | retained      |                                |
+   | Terminate/Verify) |               |                                |
+   +-------------------+---------------+--------------------------------+
+   | platform/open/    | Evolved into  | Semantically consistent,       |
+   | dual verification | Verification  | performance metrics retained   |
+   | modes             | Modes section |                                |
+   +-------------------+---------------+--------------------------------+
+   | Pending           | Clarified as  | Clearer state machine          |
+   | intermediate state| DELEGATING    |                                |
+   +-------------------+---------------+--------------------------------+
+   | Acceptance        | Strengthened  | Stricter security              |
+   | signature         | as dual-      | requirements                   |
+   |                   | contract      |                                |
+   |                   | mechanism     |                                |
+   +-------------------+---------------+--------------------------------+
+   | 10-level chain    | Retained      | From recommendation to         |
+   | depth limit       |               | SHOULD-level                   |
+   +-------------------+---------------+--------------------------------+
+   | Three-tier        | Evolved to    | Clearer concepts,              |
+   | privacy           | Public/Logical/| functionally consistent        |
+   | architecture      | Private tiers |                                |
+   | (LPV/SEN/GEI)     |               |                                |
+   +-------------------+---------------+--------------------------------+
+
+   Compatibility Commitment: All HJS-00 receipts are verifiable in
+   JEP-01; JEP-01 new features are optional extensions.
+
+
+Appendix E.  Implementation Guide
+
+E.1.  Reference Implementation
+
+   Reference Implementation v1.0 is available at:
+   https://github.com/hjs-spec/jep-reference-impl
+
+   Implementation details:
+   - Language: Rust 1.75 with ring cryptography crate
+   - License: Apache-2.0
+   - Test coverage: 94% line coverage, 100% state machine coverage
+
+E.2.  Minimal Viable Implementation (Pseudocode)
+
+   ```python
+   class Receipt:
+       def __init__(self, event_id, actor, decision_hash):
+           self.event_id = event_id
+           self.actor = actor
+           self.decision_hash = decision_hash
+           self.prev_hash = None
+           self.signature = None
+
+       def sign(self, private_key):
+           data = self.canonicalize()
+           self.signature = sign(private_key, data)
+
+       def verify(self, public_key):
+           data = self.canonicalize()
+           return verify(public_key, data, self.signature)
+
+       def canonicalize(self):
+           # Use JCS (RFC 8785)
+           return jcs(self.to_dict())
+   ```
+
+E.3.  Implementation Checklist
+
+   - [ ] All four primitives implemented
+   - [ ] State machine (7 states) supported
+   - [ ] Three verification modes (open/platform/dual)
+   - [ ] Chain depth limit (10 levels)
+   - [ ] Dual-contract enforcement
+   - [ ] Cryptographic erasure (optional)
+   - [ ] TEE binding (optional)
+   - [ ] IANA registry usage
+
+E.4.  Common Implementation Errors
+
+   - Forgetting JCS canonicalization causing signature verification
+     failure
+   - Not using UTC for timestamps causing cross-timezone issues
+   - Not checking chain depth causing DoS vulnerability
+   - Wrong signature verification order (SHOULD verify prev_hash
+     first)
+   - Not handling DELEGATING timeout rollback
+
+E.5.  Performance Optimization
+
+   - Cache frequently used public key verification results
+   - Parallel verification of multi-level delegation chains
+   - Use CBOR compact format to reduce bandwidth
+   - Pre-compute hash values
+
+
+Appendix F.  Test Vectors
+
+F.1.  Judge Receipt Example
+
+   ```json
+   {
+     "hjs": "1.0",
+     "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+     "actor": "did:example:agent123",
+     "decision_hash": {
+       "hash": "3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835
+               420b6b9942dd4f1b",
+       "alg": "sha256"
+     },
+     "authority_scope": "https://hospital.example/policy/diagnosis/v1",
+     "valid": {
+       "from": 1712345678,
+       "until": 1712349278
+     },
+     "state": "A",
+     "prev_hash": null,
+     "primitive": {"type": "J"},
+     "proof": {
+       "signature": "base64-encoded-signature",
+       "alg": "Ed25519"
+     }
+   }
+   ```
+
+F.2.  Verification Vectors
+
+   - Input: Above receipt
+   - Canonicalized JCS output: 
+     {"actor":"did:example:agent123","authority_scope":"https://hospital.example/policy/diagnosis/v1","decision_hash":{"alg":"sha256","hash":"3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"},"hjs":"1.0","id":"f47ac10b-58cc-4372-a567-0e02b2c3d479","prev_hash":null,"primitive":{"type":"J"},"state":"A","valid":{"from":1712345678,"until":1712349278}}
+   - SHA256 hash: 8f4e2f... (truncated)
+   - Verification result: VALID
+
+F.3.  Error Scenario Tests
+
+   - Signature error: Modify any byte -> Expected: INVALID_SIGNATURE
+   - Chain break: Modify prev_hash -> Expected: BROKEN_CHAIN
+   - Timeout: Timestamp outside window -> Expected: EXPIRED_RECEIPT
+   - Depth limit: 11-level chain -> Expected: CHAIN_TOO_DEEP
+
+F.4.  Cross-language Testing
+
+   - Provide JSON test suite
+   - All language implementations MUST pass identical tests
+
+
+Appendix G.  Protocol Extensions
+
+   This appendix defines optional extensions to the core JEP
+   protocol.  Extensions are organized by priority level based on
+   implementation recommendations.
+
+G.1.  Extension Mechanism Principles
+
+   The following principles govern all JEP extensions:
+
+   1. Extensions MUST NOT modify core protocol semantics (four
+      primitives, three modes, three-tier architecture)
+   2. Extensions MUST be registered via IANA (Section 8.4)
+   3. Extensions SHOULD follow reverse domain naming (e.g.,
+      org.example.jep.extension)
+   4. Extensions MAY declare compatibility levels (full|wire|none)
+      as defined in Section 5.5.1
+
+G.2.  Priority 1 Extensions (Strongly Recommended)
+
+   The following extensions are strongly recommended for production
+   deployments to ensure interoperability, reliability, and
+   recoverability.
+
+G.2.1.  TEE Evidence Format
+
+   Purpose: Standardize TEE evidence encoding in Tier 2
+   contextual_evidence for cross-platform interoperability.
+
+   Extension Identifier: org.ietf.jep.ext.tee-evidence
+
+   Compatibility: wire
+
+   Specification:
+   - tee_type: REQUIRED.  String identifying TEE type.  Values:
+     "Intel-TDX", "AMD-SEV-SNP", "ARM-CCA", "TPM2"
+   - format: REQUIRED.  String.  Values: "eat", "raw"
+   - evidence: REQUIRED.  Base64-encoded attestation evidence
+   - verifier: OPTIONAL.  URI of external verification service
+   - timestamp: REQUIRED.  Unix timestamp of attestation generation
+
+   Example:
+   ```json
+   {
+     "contextual_evidence": {
+       "tee_type": "Intel-TDX",
+       "format": "eat",
+       "evidence": "base64-encoded-EAT...",
+       "verifier": "https://verify.example/intel-tdx",
+       "timestamp": 1712345678
+     }
+   }
+   ```
+
+   Verification: See Section 5.3.3 for detailed verification
+   procedure.
+
+G.2.2.  Resolution Event ($Resolve)
+
+   Purpose: Provide automated recovery from DISPUTED state through
+   authorized governance intervention.
+
+   Extension Identifier: org.ietf.jep.ext.resolution
+
+   Compatibility: full
+
+   Specification:
+   - Adds new primitive: $Resolve
+   - Adds new states: DISPUTED_FROZEN, RESOLVED_CONTINUE,
+     RESOLVED_INVALID
+   - Adds new error code: RESOLUTION_REQUIRED
+
+   Resolution Event Format:
+   ```json
+   {
+     "primitive": {
+       "type": "RESOLVE",
+       "payload": {
+         "disputed_receipt": "uuid-of-disputed-receipt",
+         "resolution": "RESOLVED_CONTINUE|RESOLVED_INVALID|RESOLVED_REPLACE",
+         "resolution_proof": "multi-signature-from-governance",
+         "new_anchor": "uuid-of-new-anchor-receipt",
+         "effective_from": 1712345678,
+         "resolution_statement": "Human-readable explanation"
+       }
+     }
+   }
+   ```
+
+   State Transitions:
+   - ACTIVE/DELEGATED -> DISPUTED_FROZEN (on dual mode conflict)
+   - DISPUTED_FROZEN -> RESOLVED_CONTINUE (chain continues)
+   - DISPUTED_FROZEN -> RESOLVED_INVALID (chain re-initiated)
+
+   See Section 4.5.5 for detailed recovery procedure.
+
+G.2.3.  Multi-Source Time Validation
+
+   Purpose: Enhance time reliability through multiple independent
+   time sources with consensus algorithm.
+
+   Extension Identifier: org.ietf.jep.ext.multi-time
+
+   Compatibility: full
+
+   Specification:
+   - timestamp_validation.mode: REQUIRED.  String.  Values:
+     "strict", "tolerant", "multi_source"
+   - timestamp_validation.sources: REQUIRED when mode is
+     "multi_source".  Array of time source objects.
+   - timestamp_validation.consensus: REQUIRED when mode is
+     "multi_source".  String.  Values: "majority", "median",
+     "min_drift"
+
+   Time Source Object:
+   - type: REQUIRED.  String.  Values: "local_ntp",
+     "scitt_anchor", "hardware_clock"
+   - offset_ms: REQUIRED for local_ntp.  Integer.
+   - timestamp: REQUIRED for scitt_anchor.  Integer.
+   - tolerance_ms: REQUIRED for scitt_anchor.  Integer.
+   - evidence: REQUIRED for hardware_clock.  Base64.
+
+   Example:
+   ```json
+   {
+     "timestamp_validation": {
+       "mode": "multi_source",
+       "sources": [
+         {"type": "local_ntp", "offset_ms": 50},
+         {"type": "scitt_anchor", "timestamp": 1712345678,
+          "tolerance_ms": 5000},
+         {"type": "hardware_clock", "evidence": "base64..."}
+       ],
+       "consensus": "median"
+     }
+   }
+   ```
+
+   Consensus Algorithm: See Section 4.7.2.
+
+G.3.  Priority 2 Extensions (Optional)
+
+   The following extensions are optional and may be implemented
+   based on specific deployment scenarios.
+
+G.3.1.  Lightweight Mode
+
+   Purpose: Reduce receipt size and verification overhead for
+   resource-constrained environments (edge, IoT).
+
+   Extension Identifier: org.ietf.jep.ext.lightweight
+
+   Compatibility: wire
+
+   Specification:
+   - jep_version: "1.0-lite"
+   - compression: OPTIONAL.  String.  Values: "gzip", "zstd"
+   - chain_proof.type: "partial" (only last N ancestors)
+   - verification_mode: MUST be "open" (platform attestation
+     optional)
+   - platform_attestation: OPTIONAL (MAY be omitted)
+
+   Receipt Size Target: < 500 bytes (compressed)
+
+   Example:
+   ```json
+   {
+     "hjs_receipt": "1.0-lite",
+     "compression": "gzip",
+     "event_hash": "sha256:...",
+     "chain_proof": {
+       "type": "partial",
+       "anchor": {"hash": "...", "alg": "sha256"},
+       "depth": 3,
+       "verifier_cache_hint": "ttl=3600"
+     },
+     "verification_mode": "open",
+     "platform_attestation": null
+   }
+   ```
+
+G.3.2.  AIP Usage
+
+   Purpose: Deep usage with Agent Identity Protocol for
+   AI Agent collaboration scenarios.
+
+   Extension Identifier: org.ietf.jep.ext.aip
+
+   Compatibility: wire
+
+   Specification:
+   - Adds protected header fields:
+     * aip_session: OPTIONAL.  URN binding Agent session
+     * aip_capability: OPTIONAL.  URN declaring Agent capability
+
+   Header Example:
+   ```json
+   {
+     "protected_header": {
+       "alg": "EdDSA",
+       "typ": "JEP-Receipt",
+       "jep_v": "1.0",
+       "jep_aid": "did:example:agent123",
+       "aip_session": "urn:uuid:session-456",
+       "aip_capability": "urn:agent:capability:diagnose"
+     }
+   }
+   ```
+
+   Verification: Verifiers SHOULD check AIP capability matches
+   authorization scope.
+
+G.3.3.  Batch Operations
+
+   Purpose: Improve efficiency for high-frequency judgment
+   scenarios through atomic batch processing.
+
+   Extension Identifier: org.ietf.jep.ext.batch
+
+   Compatibility: none
+
+   Specification:
+   - Adds new primitive: $Batch
+   - Operations array contains sequential primitive calls
+   - Batch receipt hash includes aggregate proof of all operations
+
+   Batch Event Format:
+   ```json
+   {
+     "primitive": {
+       "type": "BATCH",
+       "payload": {
+         "operations": [
+           {"type": "J", "actor": "did:example:agent1",
+            "decision_hash": "..."},
+           {"type": "D", "parent": "receipt-1",
+            "delegatee": "did:example:agent2"},
+           {"type": "T", "target": "receipt-2", "mode": "ARCHIVED"}
+         ],
+         "batch_id": "uuid-batch-123",
+         "timestamp": 1712345678,
+         "atomic": true
+       }
+     }
+   }
+   ```
+
+   Atomicity: If atomic is true, all operations succeed or all
+   fail.  If false, partial success allowed with rollback
+   indicators.
+
+G.3.4.  Refusal Event
+
+   Purpose: Support accountability for AI system "refusal to generate"
+   scenarios, interoperable with CAP-SRP draft.
+
+   Extension Identifier: org.ietf.jep.ext.refusal
+
+   Compatibility: wire
+
+   Specification:
+   - Adds new event type: $Refuse
+   - refusal.reason: Refusal reason classification (e.g.,
+     "harmful_content", "out_of_scope", "unable_to_execute")
+   - refusal.policy_ref: URI referencing specific policy clause
+   - refusal.input_hash: Optional hash of input triggering refusal
+   - refusal.evidence: Evidence chain for refusal decision (e.g.,
+     classifier outputs)
+
+   Event Format:
+   ```json
+   {
+     "primitive": {
+       "type": "REFUSE",
+       "payload": {
+         "refusal_id": "uuid-refusal-123",
+         "reason": "content_safety_violation",
+         "policy_ref": "https://example.com/policy/safety/v2#section-3.2",
+         "input_hash": {
+           "hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c7...",
+           "alg": "sha256"
+         },
+         "evidence": [
+           {"classifier": "toxicity", "score": 0.98, "threshold": 0.9},
+           {"classifier": "bias_detect", "score": 0.85, "threshold": 0.8}
+         ],
+         "timestamp": 1712345678,
+         "actor": "did:example:agent-safety-123"
+       }
+     }
+   }
+   ```
+
+   State Machine Integration:
+   - $Refuse MAY be executed in ACTIVE or DELEGATED states
+   - Post-refusal state options: remain ACTIVE (continue service) or
+     TERMINATED (terminate session)
+   - Supports responsibility chain tracing: refusal decision can be
+     associated with specific agent in authorization chain
+
+   Interoperability with CAP-SRP:
+   - refusal.evidence field compatible with CAP-SRP refusal log format
+   - MAY carry CAP-SRP "integrity invariants" as evidence
+   - refusal.policy_ref supports CAP-SRP policy reference URIs
+
+   Verification Requirements:
+   - Verifiers MUST check refusal.reason against deployment policy
+   - Verifiers SHOULD validate refusal.evidence cryptographic integrity
+   - refusal.input_hash SHOULD match actual input if available
+
+   Privacy Considerations:
+   - input_hash enables accountability without exposing raw input
+   - evidence SHOULD minimize sensitive data exposure
+   - Tier 3 privacy protections apply to refusal evidence
+
+G.4.  Priority 3 Extensions (Security Enhancement)
+
+   The following extensions enhance security for high-assurance
+   deployments.
+
+G.4.1.  Key Evolution
+
+   Purpose: Provide forward secrecy through cryptographically
+   verifiable key rotation.
+
+   Extension Identifier: org.ietf.jep.ext.key-evolution
+
+   Compatibility: wire
+
+   Specification:
+   - Adds new event type: ROTATE_KEY
+   - Old key signs rotation proof
+   - New key becomes effective after rotation block height/time
+
+   Rotation Event Format:
+   ```json
+   {
+     "key_rotation": {
+       "old_key_id": "did:example:key1",
+       "new_key_id": "did:example:key2",
+       "rotation_proof": "signature-from-old-key",
+       "effective_from": 1712345678,
+       "revocation_anchor": "scitt-entry-id"
+     }
+   }
+   ```
+
+   Verification Rules:
+   - Post-rotation receipts MUST use new key
+   - Pre-rotation receipts remain valid
+   - Rotation events MUST be logged in Tier 2
+
+G.4.2.  Enhanced Hardware Binding
+
+   Purpose: Provide physical binding strength comparable to PoP
+   (Proof of Personhood), while maintaining compatibility with
+   existing TEE binding.
+
+   Extension Identifier: org.ietf.jep.ext.enhanced-hardware
+
+   Compatibility: wire
+
+   Priority: Priority 3 (Security Enhancement) [MAY be upgraded to
+   Priority 2 for high-security deployments]
+
+   Specification Enhancement:
+
+   1. Binding Levels:
+      - binding_level: "standard" | "enhanced" | "maximum"
+        * standard: TEE binding only (existing, Section 5.3)
+        * enhanced: TEE + VDF (Verifiable Delay Function)
+        * maximum: TEE + VDF + biometric signals
+
+   2. VDF Support (referencing Pietrzak [VDF-PIETRZAK] and
+      Wesolowski [VDF-WESOLOWSKI] schemes):
+      ```json
+      {
+        "proof": {
+          "signature": "base64-signature",
+          "alg": "Ed25519",
+          "key_id": "did:example:key1",
+          "hardware_proof": {
+            "type": "enhanced",
+            "binding_level": "enhanced",
+            "tee_evidence": {
+              // Standard TEE evidence as per Section 5.3.1
+            },
+            "vdf_proof": {
+              "scheme": "pietrzak|wesolowski|class_group",
+              "difficulty": 1000000,
+              "challenge": "base64-challenge",
+              "output": "base64-vdf-output",
+              "proof": "base64-vdf-proof",
+              "timestamp": 1712345678,
+              "source_nonce": "receipt-id-binding",
+              "verification_time_ms": 10
+            }
+          }
+        }
+      }
+      ```
+
+      VDF Requirements:
+      - Sequential computation: No parallelization advantage
+      - Efficient verification: Verification in polylog(T) time
+      - Uniqueness: Exactly one valid output per input
+      - Binding: source_nonce MUST bind to specific receipt ID
+
+   3. Biometric Signal Support (referencing FIDO2/Passkeys [FIDO2]
+      and liveness detection best practices [ISO30107]):
+      ```json
+      {
+        "biometric_binding": {
+          "type": "heartbeat_signature|voice_print|behavioral|facial_liveness",
+          "template_hash": "sha256:hash-of-biometric-template",
+          "capture_timestamp": 1712345678,
+          "liveness_proof": {
+            "type": "active|passive|hybrid",
+            "challenge_response": "base64-response",
+            "confidence_score": 0.99,
+            "spoofing_resistance": "high"
+          },
+          "verifier": "https://biometric-verifier.example",
+          "privacy_mode": "zero_knowledge|template_only"
+        }
+      }
+      ```
+
+      Biometric Requirements:
+      - Liveness detection MUST resist presentation attacks
+      - Template storage SHOULD use secure enclave
+      - Zero-knowledge proofs MAY protect raw biometric data
+      - Multi-modal biometrics RECOMMENDED for high-assurance
+
+   4. Multi-Factor Combination (maximum level):
+      ```json
+      {
+        "hardware_proof": {
+          "type": "maximum",
+          "binding_level": "maximum",
+          "factors": [
+            {
+              "type": "tee",
+              "evidence": {
+                "tee_type": "Intel-TDX",
+                "mr_td": "hex-measurement",
+                "report_data": "vdf-challenge-binding"
+              },
+              "weight": 0.4
+            },
+            {
+              "type": "vdf",
+              "proof": {
+                "scheme": "pietrzak",
+                "difficulty": 1000000,
+                "output": "base64-output",
+                "proof": "base64-proof"
+              },
+              "weight": 0.3
+            },
+            {
+              "type": "biometric",
+              "data": {
+                "type": "facial_liveness",
+                "template_hash": "sha256:hash",
+                "liveness_proof": {...}
+              },
+              "weight": 0.3
+            }
+          ],
+          "combined_attestation": "base64-multi-factor-attestation",
+          "threshold": 0.9
+        }
+      }
+      ```
+
+      Multi-Factor Requirements:
+      - Each factor cryptographically bound to receipt ID
+      - Combined score MUST meet configured threshold
+      - Failure of any single factor MAY be compensated by others
+      - All factor evidence included in Tier 2 contextual_evidence
+
+   5. Backward Compatibility:
+      - enhanced level backward compatible with standard (verifiers
+        MAY ignore VDF, validate TEE only)
+      - maximum level requires enhanced verifier, but receipts
+        parsable by base implementations (unknown fields ignored per
+        JSON spec)
+
+   Security Analysis:
+   - VDF prevents real-time forgery attacks by enforcing sequential
+     computation delay
+   - Biometric binding provides human-in-the-loop proof
+   - Multi-factor design prevents single-point-of-failure
+   - Comparable to PoP physical binding strength when maximum level
+     enabled
+
+   Privacy Considerations:
+   - Biometric templates hashed, raw data never stored in receipt
+   - Zero-knowledge proofs MAY conceal biometric details
+   - Liveness detection prevents replay of biometric data
+   - Tier 3 protections apply to biometric evidence
+
+G.5.  Priority 4 Extensions (Compliance Support)
+
+   The following extensions support cross-border compliance and
+   legal admissibility.
+
+G.5.1.  Jurisdiction Marking
+
+   Purpose: Mark receipts with applicable legal jurisdiction for
+   cross-border deployments.
+
+   Extension Identifier: org.ietf.jep.ext.jurisdiction
+
+   Compatibility: full
+
+   Specification:
+   - jurisdiction.governing_law: REQUIRED.  String.  Values:
+     "GDPR", "CCPA", "PIPL", "none"
+   - jurisdiction.data_localization: REQUIRED.  String.  Values:
+     "eu", "us", "cn", "global"
+   - jurisdiction.retention_period_days: REQUIRED.  Integer.
+   - jurisdiction.erasure_proof_required: REQUIRED.  Boolean.
+
+   Example:
+   ```json
+   {
+     "jurisdiction": {
+       "governing_law": "GDPR",
+       "data_localization": "eu",
+       "retention_period_days": 2555,
+       "erasure_proof_required": true
+     }
+   }
+   ```
+
+   Processing Rules:
+   - Receipts SHOULD be marked at generation time
+   - Verifiers SHOULD adjust validation per jurisdiction
+   - Dispute resolution SHOULD prioritize marked jurisdiction
+
+G.5.2.  Legal Validity Proof
+
+   Purpose: Enhance courtroom admissibility through notary and
+   regulatory witness signatures.
+
+   Extension Identifier: org.ietf.jep.ext.legal-proof
+
+   Compatibility: full
+
+   Specification:
+   - compliance_proof.regulation: REQUIRED.  String referencing
+     specific regulation article
+   - compliance_proof.timestamp: REQUIRED.  Unix timestamp
+   - compliance_proof.witnesses: REQUIRED.  Array of witness
+     objects
+   - compliance_proof.pkd: OPTIONAL.  Proof of Key Destruction
+   - compliance_proof.audit_trail: OPTIONAL.  Array of related
+     receipt IDs
+
+   Witness Object:
+   - type: REQUIRED.  "notary" or "regulatory_body"
+   - id: REQUIRED.  URI identifier
+   - signature: REQUIRED for notary.  Base64 signature
+   - acknowledgment: REQUIRED for regulatory_body.  Base64
+     acknowledgment
+
+   Example:
+   ```json
+   {
+     "compliance_proof": {
+       "regulation": "GDPR Article 17",
+       "timestamp": 1712345678,
+       "witnesses": [
+         {"type": "notary", "id": "notary.example",
+          "signature": "base64..."},
+         {"type": "regulatory_body", "id": "ico.uk",
+          "acknowledgment": "base64..."}
+       ],
+       "pkd": "proof-of-key-destruction",
+       "audit_trail": ["receipt-1", "receipt-2"]
+     }
+   }
+   ```
+
+   Goal: Enable JEP receipts as admissible evidence in legal
+   proceedings.
+
+G.5.3.  GDPR Compliance Proof
+
+   Extension Identifier: org.ietf.jep.ext.gdpr-proof
+   Compatibility: full
+   Priority: Priority 4 (Compliance Support)
+
+   Purpose: Provide cryptographic proof of GDPR compliance for
+   audit and regulatory authorities, supporting EDPB 2025 "right to
+   erasure" priority enforcement action.
+
+   Specification:
+   - gdpr.article: REQUIRED.  Specific GDPR article referenced
+     (e.g., "Article 17")
+   - gdpr.erasure_proof: REQUIRED for ERASED mode.  Object
+     containing:
+     * pkd: Proof of Key Destruction
+     * erasure_timestamp: Unix timestamp of erasure
+     * witness: Base64 witness signature
+   - gdpr.retention_period_days: REQUIRED.  Configured retention
+     period
+   - gdpr.dpo_signature: OPTIONAL.  Data Protection Officer
+     signature
+   - gdpr.audit_log: REQUIRED.  Array of related audit event IDs
+
+   Example:
+   ```json
+   {
+     "gdpr": {
+       "article": "Article 17",
+       "erasure_proof": {
+         "pkd": "base64-pkd-hash",
+         "erasure_timestamp": 1712345678,
+         "witness": "base64-witness-signature"
+       },
+       "retention_period_days": 2555,
+       "dpo_signature": "base64-dpo-sig",
+       "audit_log": ["audit-event-1", "audit-event-2"]
+     }
+   }
+   ```
+
+   Verification Rules:
+   - If termination_mode is "ERASED", gdpr.erasure_proof MUST be
+     present
+   - erasure_timestamp MUST be within ±5 seconds of $Terminate
+     event timestamp
+   - If DPO signature configured, verify signature validity
+   - Audit logs SHOULD support EDPB required "case-by-case
+     processing" traceability
+
+G.5.4.  AI Act Transparency Marking
+
+   Extension Identifier: org.ietf.jep.ext.ai-act-transparency
+   Compatibility: wire
+   Priority: Priority 4 (Compliance Support)
+
+   Purpose: Support EU AI Act Article 50 high-risk AI transparency
+   obligations.
+
+   Specification:
+   - ai_act.risk_level: REQUIRED.  String.  Values: "high",
+     "limited", "minimal"
+   - ai_act.transparency_obligation: REQUIRED.  Boolean,
+     whether AI interaction disclosure required
+   - ai_act.synthetic_content: REQUIRED.  Boolean, whether
+     synthetic/deepfake content
+   - ai_act.human_oversight: OPTIONAL.  Human supervisor ID
+   - ai_act.conformity_assessment: OPTIONAL.  Conformity
+     assessment identifier
+
+   Example:
+   ```json
+   {
+     "ai_act": {
+       "risk_level": "high",
+       "transparency_obligation": true,
+       "synthetic_content": true,
+       "human_oversight": "did:example:human-supervisor-456",
+       "conformity_assessment": "EU-HR-AI-2026-12345"
+     }
+   }
+   ```
+
+   Usage Scenarios:
+   - High-risk AI systems (medical diagnosis, recruitment
+     screening) MUST declare risk_level as "high"
+   - Synthetic content (AIGC, deepfakes) MUST set
+     synthetic_content to true
+   - Human supervisor ID can be used to trace ultimate
+     responsibility principal
+   - Conformity assessment identifier supports regulatory
+     authority traceability
+
+   Coordination with GDPR: AI Act required high-risk AI record
+   retention periods (typically 6 years) SHOULD be coordinated
+   with gdpr.retention_period_days configuration.
+
+G.6.  Priority 5 Extensions (Governance Flexibility)
+
+   The following extensions provide optional governance
+   configuration flexibility for complex deployment scenarios.
+
+G.6.1.  Federal Resolution
+
+   Purpose: Enable configurable multi-party governance for
+   dispute resolution, supporting scenarios from single-signature
+   to multi-signature without protocol modification.
+
+   Extension Identifier: org.ietf.jep.ext.federal-resolution
+
+   Compatibility: full
+
+   Specification:
+   - governance_model: REQUIRED.  String.  Values: "single",
+     "federal"
+   - governance_participants: REQUIRED when governance_model is
+     "federal".  Array of participant objects.
+   - threshold_policy: REQUIRED when governance_model is
+     "federal".  Decimal 0.0-1.0.
+
+   Participant Object:
+   - participant_id: REQUIRED.  URI identifier of governance
+     principal
+   - weight: REQUIRED.  Decimal 0.0-1.0, sum of all weights
+     MUST equal 1.0
+   - role: OPTIONAL.  String describing role (e.g., "auditor",
+     "regulator", "operator")
+
+   Resolution Verification:
+   - For governance_model "single": verify single signature
+     matches configured governance_principal
+   - For governance_model "federal": verify signatures from
+     participants with sum(weight) >= threshold_policy
+
+   Backward Compatibility:
+   - governance_model "single" is equivalent to base protocol
+     $Resolve with single governance_principal
+   - Implementations not supporting this extension treat federal
+     resolution receipts as standard $Resolve receipts with
+     extended validation (MAY reject if threshold not met)
+
+   Example (single, backward compatible):
+   ```json
+   {
+     "governance": {
+       "model": "single",
+       "participants": [
+         {"participant_id": "did:example:governance-1", "weight": 1.0}
+       ],
+       "threshold_policy": 1.0
+     },
+     "governance_signatures": ["base64-sig-1"]
+   }
+   ```
+
+   Example (federal, three-party):
+   ```json
+   {
+     "governance": {
+       "model": "federal",
+       "participants": [
+         {"participant_id": "did:example:party-a", "weight": 0.4,
+          "role": "operator"},
+         {"participant_id": "did:example:party-b", "weight": 0.3,
+          "role": "auditor"},
+         {"participant_id": "did:example:party-c", "weight": 0.3,
+          "role": "regulator"}
+       ],
+       "threshold_policy": 0.7
+     },
+     "governance_signatures": ["base64-sig-a", "base64-sig-b"]
+   }
+   ```
+
+   Deployment Notes:
+   - This extension defines technical mechanism only; selection
+     of governance participants and weight assignment is
+     determined by deployer based on local requirements
+   - For cross-border deployments, participants MAY represent
+     multiple jurisdictions
+   - Threshold_policy configuration affects security and
+     availability trade-offs; higher thresholds increase security
+     but may reduce availability if participants are unavailable
+
+   Security Considerations:
+   - Compromise of participants with combined weight >=
+     threshold_policy allows unauthorized resolution
+   - Participant key rotation MUST be supported through
+     governance configuration update receipts
+   - Weight redistribution SHOULD require existing threshold
+     approval to prevent malicious reconfiguration
+
+
+Appendix H.  TEE Evidence Examples
+
+H.1.  Intel TDX EAT Example
+
+   ```json
+   {
+     "contextual_evidence": {
+       "tee_type": "Intel-TDX",
+       "format": "eat",
+       "evidence": {
+         "eat_nonce": "948f8860d13a463e",
+         "oemid": 64242,
+         "hwversion": ["3.1", 1],
+         "tdx_measurements": {
+           "mr_td": "abc123...",
+           "rtmrs": [
+             "def456...",
+             "ghi789...",
+             "jkl012...",
+             "mno345..."
+           ],
+           "tee_tcb_svn": "08010800000000000000000000000000",
+           "report_data": "user-provided-nonce-or-data..."
+         }
+       },
+       "verifier": "https://verify.example/intel-tdx",
+       "timestamp": 1712345678
+     }
+   }
+   ```
+
+H.2.  AMD SEV-SNP Raw Format Example
+
+   ```json
+   {
+     "contextual_evidence": {
+       "tee_type": "AMD-SEV-SNP",
+       "format": "raw",
+       "evidence": {
+         "measurement": "launch-measurement-hex...",
+         "report_id": "report-id-hex...",
+         "reported_tcb": "tcb-version-hex...",
+         "chip_id": "chip-identifier-hex...",
+         "report_data": "receipt-id-binding..."
+       },
+       "verifier": "https://verify.example/amd-sev",
+       "timestamp": 1712345678
+     }
+   }
+   ```
+
+H.3.  TEE Binding Check Procedure
+
+   To verify TEE binding to a specific receipt:
+
+   1. Extract jep_rid from receipt Tier 1 header
+   2. Locate report_data or eat_nonce in TEE evidence
+   3. Verify exact match: report_data == SHA-256(jep_rid) or
+      direct string match for short IDs
+   4. If mismatch, reject receipt as potential replay attack
+
+
+Appendix I.  Dispute Resolution Workflow Examples
+
+I.1.  Scenario: Platform Compromise Suspected
+
+   Timeline:
+   T0: $Judge receipt R1 generated in TEE environment
+   T1: $Delegate receipt R2 generated (normal operation)
+   T2: dual mode verification detects conflict
+       - open mode: VALID (cryptographic proof intact)
+       - platform mode: INVALID (signature verification fails)
+       - State: DISPUTED_FROZEN, chain frozen
+
+   T3: Security team investigates, confirms platform key
+       compromise, but cryptographic proofs intact
+
+   T4: Governance committee issues $Resolve receipt R3:
+       ```json
+       {
+         "event_type": "Resolve",
+         "target_dispute_receipt": "R2-id",
+         "resolution_type": "RESOLVED_CONTINUE",
+         "resolution_statement": "Platform key compromised but
+           cryptographic chain intact per open verification.
+           Chain authorized to continue with enhanced monitoring.",
+         "governance_signatures": ["sig1", "sig2", "sig3"]
+       }
+       ```
+
+   T5: Chain unfreezes, R2 marked "verified_with_resolution",
+       subsequent operations proceed normally
+
+I.2.  Scenario: Deep Chain Invalidation
+
+   Timeline:
+   T0-T10: 10-level delegation chain established
+   T11: dual mode detects conflict at level 7, investigation
+        reveals systematic tampering in sub-delegation
+
+   T12: Governance issues $Resolve with RESOLVED_INVALID:
+       - Receipts R7-R10 marked "invalid"
+       - Chain MUST be re-initiated from R6 (last known good)
+       - New $Delegate from R6 to replacement actors
+
+I.3.  Automated Recovery Example
+
+   T0: $Judge in high-latency environment
+   T1: dual mode verification
+       - platform mode: VALID (< 10ms)
+       - open mode: TIMEOUT (> 100ms, network issue)
+   T2: Auto-retry open mode (attempt 1/3)
+   T3: Auto-retry open mode (attempt 2/3)
+   T4: Open mode succeeds on 3rd attempt
+   T5: Auto-resolved to VALID with "auto_resolved" flag and
+       diagnostic log: "open_mode_retry_succeeded"
+
+
+Appendix J.  EU Compliance Quick Reference Guide
+
+   This appendix provides deployers with EU GDPR and AI Act
+   compliance quick checklists and configuration recommendations,
+   based on ENISA Data Protection Engineering best practices and
+   EDPB enforcement guidelines.
+
+J.1.  GDPR Compliance Checklist
+
+   +------------------------+--------------------------------+----------+
+   | Requirement            | JEP Implementation Location    | Deploy   |
+   +------------------------+--------------------------------+----------+
+   | Accountability         | Four primitives + $Verify      | Required |
+   | (Art.5(2))             | (4.1)                          |          |
+   +------------------------+--------------------------------+----------+
+   | Privacy by Design      | Three-tier architecture        | Required |
+   | (Art.25)               | (Section 3)                    |          |
+   +------------------------+--------------------------------+----------+
+   | Right to be Forgotten  | Cryptographic erasure (7.3) +  | Required |
+   | (Art.17)               | G.5.3                          |          |
+   +------------------------+--------------------------------+----------+
+   | Data Minimization      | 7.2 + Three-tier architecture  | Required |
+   | (Art.5(1)(c))          |                                |          |
+   +------------------------+--------------------------------+----------+
+   | Data Security (Art.32) | TEE binding (5.3) + G.4.2      | Recommended|
+   +------------------------+--------------------------------+----------+
+   | Data Subject Access    | Requires origin system to      | Required |
+   | (Art.15)               | provide Tier 3 content         |          |
+   +------------------------+--------------------------------+----------+
+   | Processing Records     | Receipt chain as processing    | Recommended|
+   | (Art.30)               | activity log                   |          |
+   +------------------------+--------------------------------+----------+
+
+   EDPB 2025 Priority Enforcement Theme Reminder: Right to erasure
+   (Art.17) is EDPB Coordinated Enforcement Framework (CEF) 2025
+   priority.  Deployers should ensure cryptographic erasure
+   mechanism is correctly configured and PKD proof is recorded.
+
+J.2.  EU AI Act Compliance Checklist
+
+   +------------------------+--------------------------------+----------+
+   | Requirement            | JEP Implementation Location    | High-Risk|
+   +------------------------+--------------------------------+----------+
+   | Traceability (Art.12)  | $Delegate chain (4.1.2)        | Required |
+   +------------------------+--------------------------------+----------+
+   | Transparency Disclosure| AI Act extension (G.5.4)       | Required |
+   | (Art.50)               |                                |          |
+   +------------------------+--------------------------------+----------+
+   | Human Oversight        | AI Act extension (G.5.4)       | Required |
+   | (Art.14)               |                                |          |
+   +------------------------+--------------------------------+----------+
+   | Bias Detection Data    | Three-tier architecture        | Required |
+   | Processing             | (Section 3)                    |          |
+   +------------------------+--------------------------------+----------+
+   | Conformity Assessment  | AI Act extension (G.5.4)       | Required |
+   | Records                |                                |          |
+   +------------------------+--------------------------------+----------+
+   | Risk Management System | $Resolve dispute resolution    | Recommended|
+   |                        | (4.5.5)                        |          |
+   +------------------------+--------------------------------+----------+
+
+   Effective Date Reminder: High-risk AI system transparency
+   obligations take effect August 2, 2026.  Deployers should
+   complete JEP-01 AI Act extension configuration before this date.
+
+J.3.  Cryptographic Erasure Audit Evidence Chain
+
+   To prove compliant fulfillment of right to be forgotten, the
+   following evidence should be retained (referencing EDPB
+   guidelines):
+
+   1. $Terminate event (ERASED mode) - proves termination action
+   2. PKD (Proof of Key Destruction) - proves key destroyed
+   3. Tier 1/Tier 2 data - proves "who, when, based on what
+      authorization"
+   4. Timestamp consensus evidence (4.7) - proves erasure time
+      credibility
+   5. DPO signature (G.5.3) - enhances organizational
+      accountability proof (optional but recommended)
+
+   Evidence Retention Strategy: Per EDPB recommendations, access
+   request related data should have clear retention periods and be
+   stored separately from other data.  Recommended configuration:
+   - Cryptographic erasure proof retention: 7 years (consistent
+     with GDPR statute of limitations)
+   - Audit log retention: Consistent with
+     gdpr.retention_period_days
+
+J.4.  Recommended Extension Configuration
+
+   By risk level, the following extensions are recommended:
+
+   - Minimum Compliance Configuration: G.5.1 Jurisdiction Marking
+     * Mark governing law: "GDPR"
+     * Data localization: "eu"
+     * Retention period: 2555 days (7 years)
+
+   - Standard Configuration: G.5.1 + G.5.3 GDPR Proof
+     * Add DPO signature
+     * Configure audit logs
+     * Enable PKD witness
+
+   - High-Risk AI Configuration: G.5.1 + G.5.3 + G.5.4 + G.2.1 +
+     G.4.2
+     * AI Act transparency marking
+     * TEE evidence format
+     * Hardware binding proof
+     * Mandatory human oversight record
+
+J.4.1.  Refusal Event Compliance (New)
+
+   For AI system refusal to generate scenarios, GDPR and AI Act
+   require:
+
+   - Refusal reason recording: Satisfies GDPR accountability
+     principle (Art.5(2)) and AI Act traceability requirements
+     (Art.12)
+   - Policy reference: Proves refusal based on explicit rules,
+     non-discriminatory
+   - Evidence chain: Supports auditors verifying refusal decision
+     reasonableness
+
+   Configuration Recommendations:
+   - Enable G.3.4 Refusal Event extension
+   - Configure refusal.policy_ref to point to publicly accessible
+     policy documents
+   - Enable refusal.evidence encryption protection for high-risk
+     scenarios
+
+J.4.2.  Enhanced Hardware Binding Compliance (New)
+
+   For high-risk AI systems and sensitive data processing, EDPB
+   guidelines recommend "technical and organizational measures" to
+   ensure data security:
+
+   - binding_level "enhanced": Satisfies AI Act high-risk system
+     security requirements
+   - binding_level "maximum": Satisfies GDPR Art.32 enhanced
+     protection requirements for special category data
+   - VDF proof: Provides time anchoring, prevents retroactive
+     attacks
+   - Biometric binding: Ensures human oversight for critical
+     decisions
+
+   Configuration Recommendations:
+   - Medical, financial and other high-risk scenarios: minimum
+     "enhanced"
+   - Involving special category personal data: mandatory
+     "maximum"
+   - Cross-border transfer scenarios: Enable VDF time anchoring
+     to enhance evidence credibility
+
+J.5.  EDPB Enforcement Action Compliance Recommendations
+
+   Based on EDPB 2024 access rights enforcement reports and 2025
+   deletion rights priority themes:
+
+   1. Case-by-case Processing: Each data subject request should be
+      individually assessed, avoiding default requests for further
+      explanation (compliant with EDPB recommendations on
+      "excessive specification requirements")
+
+   2. Accessible Access: Support multiple channels for receiving
+      requests (not limited to web forms), considering
+      accessibility needs such as visual impairments
+
+   3. Adequate Response: Avoid providing only privacy policy
+      links, should provide customized information for specific
+      requests
+
+   4. Deletion Rights Response: Ensure response within 1 month
+      (extendable for complex cases), provide cryptographic
+      erasure proof as deletion evidence
+
+   5. Internal Procedures: Establish documented internal
+      procedures for handling data subject rights requests
+
+J.6.  Cross-Border Data Transfer Considerations
+
+   If JEP deployment involves transfer of EU personal data to
+   third countries:
+
+   - Ensure transfer mechanisms comply with GDPR Articles 44-49
+     (e.g., adequacy decisions, SCCs, etc.)
+   - Tier 3 encrypted data transfer risk reduced after key
+     destruction (computationally unreadable)
+   - Consider EDPB latest guidelines on Article 48
+   - Record transfer activities in Records of Processing
+     Activities (ROPA)
+
+J.7.  Compliance Resource References
+
+   - ENISA Data Protection Engineering Report:
+     https://www.enisa.europa.eu/publications/data-sharing-report
+   - EDPB Right to be Forgotten Guidelines 5/2019:
+     https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-52019-criteria-right-be-forgotten-search_en
+   - EDPB 2025 Enforcement Priority Themes:
+     https://www.edpb.europa.eu/news/news/2025/edpb-launches-coordinated-enforcement-framework-action-right-erasure_en
+   - EU AI Act Official Text:
+     https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689
+
+
+Appendix K.  Tier Mapping Reference
+
+   This appendix provides a quick reference for the mapping between
+   tier numbers and functional names used throughout this document.
+
+   Table K.1: Tier Naming Conventions
+
+   +--------+--------------------------------+---------------------------+
+   | Tier   | Functional Name                | Primary Content           |
+   +--------+--------------------------------+---------------------------+
+   | Tier 1 | Public Governance Tier           | Identity Anchor           |
+   +--------+--------------------------------+---------------------------+
+   | Tier 2 | Logical Accountability Tier      | Authorization Chain,      |
+   |        |                                | Contextual Evidence       |
+   +--------+--------------------------------+---------------------------+
+   | Tier 3 | Private Payload Tier             | Logic Payload (hash)      |
+   +--------+--------------------------------+---------------------------+
+
+   All references to "Tier X" in this document map to the above
+   functional names.  Implementations SHOULD use the functional
+   names in user-facing documentation for clarity.
+
+
+Author's Address
+
+   Yuqiang Wang
+   HUMAN JUDGMENT SYSTEMS FOUNDATION LTD.
+   Email: signal@humanjudgment.org
+   GitHub: https://github.com/hjs-spec
