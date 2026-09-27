@@ -1,4 +1,4 @@
-# AI Judgment Layer Standard (2026)
+# AI Judgment Layer — Original White Paper (2026)
 
 The original conceptual white paper for an AI judgment layer. Its published body is preserved as historical research; it does not override current protocol requirements.
 
