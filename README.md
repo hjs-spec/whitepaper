@@ -11,10 +11,10 @@ The original conceptual white paper for an AI judgment layer. Its published body
 | Task | Source |
 |---|---|
 | Current wire format and conformance | [JEP Core](https://github.com/hjs-spec/jep-core) |
-| Runnable signed example | [Quickstart](https://github.com/hjs-spec/jep-quickstart) |
+| Verify a signed sample | [Packaged Core example](https://github.com/hjs-spec/jep-core#verify-your-first-event) |
 | Clients, local recording and optional tools | [Repository directory](https://github.com/hjs-spec/.github/blob/main/PROJECTS.md) |
 
-The paper explains architectural motivation. JEP defines signed J/D/T/V statements; its applicable draft defines their exact scope. Code availability does not imply a live deployment.
+The paper explains architectural motivation. JEP defines signed J/D/T/V statements; its applicable draft defines their exact scope.
 
 ## License and contact
 
